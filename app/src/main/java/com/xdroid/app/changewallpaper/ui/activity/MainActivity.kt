@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.google.android.gms.ads.MobileAds
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
@@ -38,11 +39,31 @@ class MainActivity : ComponentActivity() {
                     color = background
                 ) {
                     Column {
-                        if (networkHelper.isNetworkConnected()){
-                            BannerAdView()
+                        Column() {
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f))
+                            {
+                                MyApp()
+                                
+                            }
+                            
+                            
+                            if (networkHelper.isNetworkConnected()) {
+                                Box(modifier = Modifier
+                                    .fillMaxWidth())
+                                {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    BannerAdView()
+                                }
+                            }
                         }
-                        MyApp()
-
+//                        Column(modifier = Modifier.weight(1f)) {
+//                            MyApp()
+//                        }
+//                        if (networkHelper.isNetworkConnected()){
+//                            BannerAdView()
+//                        }
 
                     }
                 }

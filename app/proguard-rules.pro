@@ -19,3 +19,35 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep all public classes and methods in com.xdroid.app.changewallpaper
+-keep class com.xdroid.app.changewallpaper.** { *; }
+
+# Keep public constructors in com.xdroid.app.changewallpaper
+-keepclassmembers class com.xdroid.app.changewallpaper.** {
+    public <init>(...);
+}
+
+# Keep custom views and their constructors
+-keep class com.xdroid.app.changewallpaper.** extends android.view.View {
+    public <init>(android.content.Context);
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+
+# Keep Parcelable implementations and their CREATOR fields
+-keepclassmembers class com.xdroid.app.changewallpaper.** implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+# Keep all annotations
+-keep interface **
+
+# Keep classes used by reflection
+-keep class com.xdroid.app.changewallpaper.** { *; }
+
+# Preserve line number information for debugging
+-keepattributes SourceFile,LineNumberTable
+
+# Hide the original source file name in stack traces
+-renamesourcefileattribute SourceFile

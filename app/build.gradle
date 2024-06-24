@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.xdroid.app.changewallpaper"
-        minSdk 24
+        minSdk 21
         targetSdk 34
         versionCode 2
         versionName "1.0.1"
@@ -24,7 +24,8 @@ android {
     flavorDimensions("environment")
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -43,6 +44,14 @@ android {
 
             applicationIdSuffix = ".salman"
             versionCode = 2
+            dimension = "environment"
+            versionName = "1.0.1"
+
+        }
+        // Define flavor for paid version
+        create("anime") {
+            applicationIdSuffix = ".anime"
+            versionCode = 1
             dimension = "environment"
             versionName = "1.0.1"
 
@@ -135,7 +144,7 @@ dependencies {
 //    implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0'
 
     //shimmer effect
-    implementation "com.valentinilk.shimmer:compose-shimmer:1.0.0"
+//    implementation "com.valentinilk.shimmer:compose-shimmer:1.0.0"
 
     //Google Add
     implementation 'com.google.android.gms:play-services-ads:23.0.0'
