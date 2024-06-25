@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">HD Wallpapers</string>
+    <string name="app_name">Mobile HD Wallpapers</string>
     <!--    ca-app-pub-1456759243536077~7721858484-->
-        <string name="ad_id">ca-app-pub-1456759243536077~7721858484</string>
+        <string name="ad_id">ca-app-pub-1456759243536077~8224847365</string>
     <!--    <string name="ad_id">ca-app-pub-3940256099942544~3347511713</string>-->
     <!--    <string name="ad_id2">ca-app-pub-1456759243536077/3900951406</string>-->
-        <string name="bannerId">ca-app-pub-1456759243536077/3900951406</string>
-        <string name="interstital">ca-app-pub-1456759243536077/1982947657</string>
+        <string name="bannerId">ca-app-pub-1456759243536077/1872225844</string>
+        <string name="interstital">ca-app-pub-1456759243536077/9298255888</string>
     <!--ca-app-pub-3940256099942544/9214589741-->
     <!--    <string name="test_ad_id">ca-app-pub-3940256099942544/9214589741</string>-->
     <!--    <string name="test_ad_id_2">ca-app-pub-3940256099942544/1033173712</string>-->

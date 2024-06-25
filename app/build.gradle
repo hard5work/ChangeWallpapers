@@ -30,7 +30,6 @@ android {
         }
     }
     productFlavors {
-        // Define flavor for free version
         create("srk") {
             applicationIdSuffix = ".srk"
             dimension = "environment"
@@ -39,7 +38,6 @@ android {
             versionName = "1.0.3"
         }
 
-        // Define flavor for paid version
         create("salman") {
 
             applicationIdSuffix = ".salman"
@@ -48,7 +46,6 @@ android {
             versionName = "1.0.1"
 
         }
-        // Define flavor for paid version
         create("anime") {
             applicationIdSuffix = ".anime"
             versionCode = 1
@@ -56,8 +53,14 @@ android {
             versionName = "1.0.1"
 
         }
+        create("artistic") {
+            applicationIdSuffix = ".artistic"
+            versionCode = 1
+            dimension = "environment"
+            versionName = "1.0.1"
 
-        // Define flavor for paid version
+        }
+
         create("all") {
             applicationIdSuffix = ".all"
             versionCode = 1

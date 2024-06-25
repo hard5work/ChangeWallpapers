@@ -75,8 +75,11 @@ fun HomeScreen(
 
             when (states.status) {
                 Status.ERROR -> {
-                    showView = false
-                    showAlert = true
+                    LaunchedEffect(Unit) {
+                        showView = false
+                        alertMessage = states.message ?: "Something went wrong"
+                        showAlert = true
+                    }
                 }
                 Status.SUCCESS -> {
                     LaunchedEffect(Unit) {
