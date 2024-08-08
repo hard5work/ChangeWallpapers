@@ -1,5 +1,6 @@
 package com.xdroid.app.changewallpaper.ui.layouts
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,17 +18,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.xdroid.app.changewallpaper.BuildConfig
-import com.xdroid.app.changewallpaper.cmodel.Item
+import com.bumptech.glide.integration.compose.placeholder
+import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.ItemModel
 import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.UrlName
@@ -42,6 +39,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     navController: NavController
@@ -62,8 +60,7 @@ fun HomeScreen(
     var myImages by remember { mutableStateOf(ArrayList<MyItems>()) }
 
 
-    Scaffold(
-    ) {
+    Scaffold() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,6 +78,7 @@ fun HomeScreen(
                         showAlert = true
                     }
                 }
+
                 Status.SUCCESS -> {
                     LaunchedEffect(Unit) {
                         val response = DynamicResponse.myObject<ItemModel>(states.data)
@@ -104,11 +102,13 @@ fun HomeScreen(
                         showAlert = false
                     }
                 }
+
                 Status.IDLE -> {
                     showView = false
 
 
                 }
+
                 Status.LOADING -> {
                     showView = false
                     Column(
@@ -148,7 +148,7 @@ fun ActionsItemList(
 ) {
     val count = 2
     LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Fixed(2),
+        columns = StaggeredGridCells.Fixed(count),
         verticalItemSpacing = 4.dp,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -156,7 +156,10 @@ fun ActionsItemList(
         if (items != null)
             items(items.size) { index ->
                 val images = "${items[index].collectionID}/${items[index].id}/${items[index].image}"
-                ActionItems(images, navController)
+                val rememberImages = remember {
+                    images
+                }
+                ActionItems(rememberImages, navController)
             }
     }
 }
@@ -169,6 +172,7 @@ fun ActionItems(
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
 
+    val imageUrl = remember { UrlName.imageUrl + item }
     Column(
         modifier = modifier
             .padding(5.dp)
@@ -187,8 +191,10 @@ fun ActionItems(
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         GlideImage(
-            model = UrlName.imageUrl + item,
-            contentDescription = item
+            model = imageUrl,
+            contentDescription = item,
+            loading = placeholder(R.drawable.baseline_image_24),
+            transition = CrossFade
         )
         Spacer(modifier = Modifier.height(5.dp))
 

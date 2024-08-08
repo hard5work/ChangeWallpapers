@@ -39,6 +39,23 @@
 -keepclassmembers class com.xdroid.app.changewallpaper.** implements android.os.Parcelable {
     public static final android.os.Parcelable$Creator *;
 }
+-keep class org.bouncycastle.** { *; }
+-keep interface org.bouncycastle.** { *; }
+-keep class org.bouncycastle.jsse.BCSSLParameters { *; }
+-dontwarn javax.naming.NamingEnumeration
+-dontwarn javax.naming.NamingException
+-dontwarn javax.naming.directory.Attribute
+-dontwarn javax.naming.directory.Attributes
+-dontwarn javax.naming.directory.DirContext
+-dontwarn javax.naming.directory.InitialDirContext
+-dontwarn javax.naming.directory.SearchControls
+-dontwarn javax.naming.directory.SearchResult
+-dontwarn org.conscrypt.Conscrypt$Version
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.ConscryptHostnameVerifier
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
 
 # Keep all annotations
 -keep interface **
