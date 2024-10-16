@@ -67,6 +67,7 @@ android {
             versionName = "1.0.1"
 
         }
+
         create("artistic") {
             applicationIdSuffix = ".artistic"
             versionCode = 1
@@ -74,7 +75,6 @@ android {
             versionName = "1.0.1"
 
         }
-
         create("all") {
             applicationIdSuffix = ".all"
             versionCode = 1
@@ -82,6 +82,17 @@ android {
             versionName = "1.0.0"
 
         }
+
+
+//       All new wallpapers
+        create("hrithik") {
+            applicationIdSuffix = ".hrithik"
+            versionCode = 1
+            dimension = "environment"
+            versionName = "1.0.1"
+
+        }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

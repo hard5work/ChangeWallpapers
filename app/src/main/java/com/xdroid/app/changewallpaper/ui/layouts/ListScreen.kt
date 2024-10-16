@@ -37,6 +37,7 @@ import com.xdroid.app.changewallpaper.utils.helpers.DynamicResponse
 import com.xdroid.app.changewallpaper.utils.vm.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import java.util.Random
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -127,7 +128,7 @@ fun HomeScreen(
             if (showView)
                 if (itemModel.value.items?.size!! > 0)
                     ActionsItemList(
-                        items = myImages,
+                        items = myImages.shuffled(Random()),
                         navController = navController
                     )
 
