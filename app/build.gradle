@@ -92,6 +92,18 @@ android {
             versionName = "1.0.1"
 
         }
+        create("ronaldo") {
+            applicationIdSuffix = ".ronaldo"
+            versionCode = 1
+            dimension = "environment"
+            versionName = "1.0.1"
+        }
+        create("messi") {
+            applicationIdSuffix = ".messi"
+            versionCode = 1
+            dimension = "environment"
+            versionName = "1.0.1"
+        }
 
     }
     compileOptions {

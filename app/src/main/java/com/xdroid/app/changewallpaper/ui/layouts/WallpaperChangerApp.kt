@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.xdroid.app.changewallpaper.data.UrlName
@@ -81,7 +85,12 @@ fun WallpaperChangerApp(imageUrl: String) {
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
             ) {
-                Text("Change Wallpaper", color = background)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+
+                    Icon(imageVector = Icons.Filled.PublishedWithChanges, contentDescription = "Change Icons", tint = background)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(text = "Change Wallpaper", color = background, fontSize = 16.sp)
+                }
             }
         } else {
             CircularProgressIndicator(color = Color.White)

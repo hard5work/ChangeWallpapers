@@ -10,6 +10,7 @@ object PrefConstant {
     const val IMAGE = "image"
     const val MAIN_ID = "id"
     const val SUBSCRIPTION_ID = "subscriptionId"
+    const val COUNTER = "counter"
     const val AUTO_LOGIN = "autoLogin"
 }
 

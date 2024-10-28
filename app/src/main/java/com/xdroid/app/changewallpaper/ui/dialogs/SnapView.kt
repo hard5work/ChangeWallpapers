@@ -248,4 +248,38 @@ fun InfoAlertDialog(
     )
 }
 
+@Composable
+fun LoadingAlertDialog(
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        properties = DialogProperties(dismissOnClickOutside = true),
+
+        confirmButton = {
+            Column() {
+
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                  CircularProgressIndicator()
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+            }
+
+        },
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .wrapContentHeight(align = Alignment.CenterVertically)
+            .wrapContentWidth(align = Alignment.CenterHorizontally)
+
+
+    )
+}
+
 
