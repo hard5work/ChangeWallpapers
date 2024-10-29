@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -154,10 +155,17 @@ fun ActionsItemList(
     items: List<MyItems>?,
     navController: NavController
 ) {
-    val count = 2
+    // Get the screen width
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+
+    // Assuming a fixed item width, adjust the number of columns based on screen width
+    val itemWidth = 120.dp // Set the desired width for each item
+    val count = (screenWidth / itemWidth).toInt()
+//    val count = 2
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(count),
-        verticalItemSpacing = 4.dp,
+        verticalItemSpacing = 2.dp,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 

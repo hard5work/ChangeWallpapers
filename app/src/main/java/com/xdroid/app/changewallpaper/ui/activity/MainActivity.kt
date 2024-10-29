@@ -47,16 +47,16 @@ class MainActivity : ComponentActivity() {
                                 MyApp()
                                 
                             }
-                            
-                            
-//                            if (networkHelper.isNetworkConnected()) {
-//                                Box(modifier = Modifier
-//                                    .fillMaxWidth())
-//                                {
-//                                    Spacer(modifier = Modifier.height(10.dp))
-//                                    BannerAdView()
-//                                }
-//                            }
+
+
+                            if (networkHelper.isNetworkConnected()) {
+                                Box(modifier = Modifier
+                                    .fillMaxWidth())
+                                {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    BannerAdView()
+                                }
+                            }
                         }
 //                        Column(modifier = Modifier.weight(1f)) {
 //                            MyApp()
