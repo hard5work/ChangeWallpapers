@@ -12,10 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.*
+import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.xdroid.app.changewallpaper.R
+import com.xdroid.app.changewallpaper.ui.activity.MainActivity
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
+import java.util.Date
 
 
 @Composable
@@ -34,9 +37,13 @@ fun BannerAdView() {
                 adUnitId = adUnitIds
                 loadAd(AdRequest.Builder().build())
             }
+        },
+        update = { adView ->
+            adView.loadAd(AdRequest.Builder().build())
         }
     )
 }
+
 
 
 var mInterstitialAd: InterstitialAd? = null
@@ -90,4 +97,57 @@ fun showInterstitial(context: Context, onAdDismissed: () -> Unit) {
 fun removeInterstitial() {
     mInterstitialAd?.fullScreenContentCallback = null
     mInterstitialAd = null
+}
+
+object OpenApp{
+    private var appOpenAd: AppOpenAd? = null
+    private var isShowingAd = false
+    private var loadTime: Long = 0
+
+    fun loadAppOpenAd(context: Context) {
+        val adRequest = AdRequest.Builder().build()
+        AppOpenAd.load(
+            context, context.getString(R.string.openApp), adRequest,
+            object : AppOpenAd.AppOpenAdLoadCallback() {
+                override fun onAdLoaded(ad: AppOpenAd) {
+                    appOpenAd = ad
+                    loadTime = Date().time
+                }
+
+                override fun onAdFailedToLoad(p0: LoadAdError) {
+                    // Handle the error
+                }
+            }
+        )
+    }
+
+    fun isAdAvailable(): Boolean {
+        return appOpenAd != null && (Date().time - loadTime) < 4 * 3600000 // 4 hours in milliseconds
+    }
+
+    fun showAppOpenAdIfAvailable(context: Context) {
+        if (!isShowingAd && isAdAvailable()) {
+            appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                override fun onAdDismissedFullScreenContent() {
+                    appOpenAd = null
+                    isShowingAd = false
+                    loadAppOpenAd(context)
+                }
+
+                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                    isShowingAd = false
+                }
+
+                override fun onAdShowedFullScreenContent() {
+                    isShowingAd = true
+                }
+            }
+            appOpenAd?.show(MainActivity())
+
+        } else {
+            loadAppOpenAd(context)
+        }
+    }
+
+
 }

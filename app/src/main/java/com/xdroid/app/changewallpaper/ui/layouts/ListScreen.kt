@@ -1,6 +1,7 @@
 package com.xdroid.app.changewallpaper.ui.layouts
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,10 @@ import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.ItemModel
@@ -91,6 +97,7 @@ fun HomeScreen(
                 Status.SUCCESS -> {
                     LaunchedEffect(Unit) {
                         val response = DynamicResponse.myObject<ItemModel>(states.data)
+                        DebugMode.e("my data $response")
                         itemModel.value = response
                         if (itemModel.value.items?.size!! > 0)
                             for (data in itemModel.value.items!!) {
@@ -202,6 +209,8 @@ fun ActionItems(
             false
         )
     }
+
+    var isLoading by remember { mutableStateOf(true) }
     Column(
         modifier = modifier
             .padding(5.dp)
@@ -213,19 +222,50 @@ fun ActionItems(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(10.dp))
+        if (isLoading) {
+            // Show the circular loading indicator while loading
+            CircularProgressIndicator(
+                color = Color.Gray
+            )
+        }
         GlideImage(
             model = imageUrl,
             contentDescription = item,
-            loading = placeholder(R.drawable.baseline_image_24),
-            transition = CrossFade
+//            loading = placeholder(R.drawable.baseline_image_24),
+            transition = CrossFade,
+            modifier = Modifier.graphicsLayer { alpha = if (isLoading) 0f else 1f },
+            requestBuilderTransform = { requestBuilder ->
+                requestBuilder.listener(object : RequestListener<Drawable> {
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        isLoading = false // Image loaded, hide indicator
+                        return false
+                    }
+
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        isLoading = false // Loading failed, hide indicator
+                        return false
+                    }
+                })
+            }
         )
         Spacer(modifier = Modifier.height(5.dp))
 
 
-
     }
 
-    if (navigate){
+    if (navigate) {
         val screen = ScreenName.Detail
         if (counter < 5) {
             navController.navigate(
@@ -260,7 +300,7 @@ fun ActionItems(
 
     }
 
-    if (showloading){
+    if (showloading) {
         LoadingAlertDialog()
     }
 

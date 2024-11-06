@@ -104,6 +104,13 @@ android {
             dimension = "environment"
             versionName = "1.0.1"
         }
+        create("anim") {
+            applicationIdSuffix = ".anim"
+            versionCode = 1
+            dimension = "environment"
+            versionName = "1.0.1"
+
+        }
 
     }
     compileOptions {

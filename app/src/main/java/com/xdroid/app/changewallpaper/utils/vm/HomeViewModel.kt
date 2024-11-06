@@ -32,6 +32,8 @@ class HomeViewModel(mainRepository: MainRepository, networkHelper: NetworkHelper
             val request = DefaultRequestModel()
             if (BuildConfig.FLAVOR == "all")
                 request.url = UrlName.allImages
+            else if (BuildConfig.FLAVOR == "anim" || BuildConfig.FLAVOR == "anime")
+                request.url = UrlName.animeImages
             else
                 request.url = UrlName.allImageList
 
