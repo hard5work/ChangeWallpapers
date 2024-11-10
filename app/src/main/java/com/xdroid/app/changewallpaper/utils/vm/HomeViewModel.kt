@@ -14,6 +14,7 @@ import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 
 class HomeViewModel(mainRepository: MainRepository, networkHelper: NetworkHelper) :
@@ -24,11 +25,12 @@ class HomeViewModel(mainRepository: MainRepository, networkHelper: NetworkHelper
     val imageResponse: StateFlow<Resource<JsonObject>>
         get() = imageRequest
 
-    var isInit = false
+    private val _isDataLoaded = MutableStateFlow(false)
+    val isInit: StateFlow<Boolean> = _isDataLoaded.asStateFlow()
+
+
 
     fun getAllImage() {
-        if (!isInit) {
-            isInit = true
             val request = DefaultRequestModel()
             if (BuildConfig.FLAVOR == "all")
                 request.url = UrlName.allImages
@@ -38,7 +40,7 @@ class HomeViewModel(mainRepository: MainRepository, networkHelper: NetworkHelper
                 request.url = UrlName.allImageList
 
             requestGetMethodDispose(request, imageRequest)
-        }
+
     }
 
 

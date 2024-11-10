@@ -4,6 +4,7 @@ import android.app.WallpaperManager
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,11 +23,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.ads.MobileAds
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
+import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView
+import com.xdroid.app.changewallpaper.ui.adscreen.CheckForAppUpdate
 import com.xdroid.app.changewallpaper.ui.adscreen.OpenApp
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
 import com.xdroid.app.changewallpaper.ui.adscreen.removeInterstitial
+import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.layouts.MyApp
 import com.xdroid.app.changewallpaper.ui.theme.ChangeWallpapersTheme
 import com.xdroid.app.changewallpaper.ui.theme.background
@@ -35,13 +44,37 @@ import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
 import kotlinx.coroutines.delay
 import org.koin.android.ext.android.inject
+import java.sql.Time
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
-    private val networkHelper:NetworkHelper by inject()
+    private val networkHelper: NetworkHelper by inject()
+
+    lateinit var timer: CountDownTimer
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        OpenApp.showAppOpenAdIfAvailable(this)
         App.preferenceHelper.setValue(PrefConstant.COUNTER, 0)
+        // Start the 15-minute countdown timer
+        loadInterstitial(this)
+        timer = object : CountDownTimer(15 * 60 * 1000, 1000) { // 15 minutes
+            override fun onTick(millisUntilFinished: Long) {
+                val minutes = (millisUntilFinished / 1000) / 60
+                val seconds = (millisUntilFinished / 1000) % 60
+                val time = String.format(Locale.ENGLISH,"%02d:%02d", minutes, seconds)
+                DebugMode.e("Time Left $time")
+            }
+
+            override fun onFinish() {
+                showInterstitial(this@MainActivity) {
+                    timer.start()
+                }
+            }
+        }
+        timer.start()
+
         setContent {
             ChangeWallpapersTheme {
                 // A surface container using the 'background' color from the theme
@@ -49,7 +82,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = background
                 ) {
+
                     Column {
+
+                        CheckForAppUpdate(
+                            onUpdateFailed = { exception ->
+                                // Handle update failure here (e.g., show a message to the user)
+                            },
+                            onUpdateComplete = {
+                                // Handle post-update completion here (e.g., refresh content)
+                            }
+                        )
                         MainScreen()
 //                        val navController = rememberNavController()
 //                        NavHost(navController, startDestination = "splash") {
@@ -67,7 +110,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+
     }
+
 
     @Composable
     private fun MainScreen() {
@@ -99,11 +145,13 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         removeInterstitial()
+        if (::timer.isInitialized) {
+            timer.cancel()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-//        OpenApp.showAppOpenAdIfAvailable(this)
     }
 }
 
@@ -147,3 +195,6 @@ fun SplashScreenPreview() {
 fun DefaultPreview() {
     MyApp()
 }
+
+
+

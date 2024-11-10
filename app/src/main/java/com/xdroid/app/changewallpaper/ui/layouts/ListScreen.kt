@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.CircularProgressIndicator
@@ -16,10 +17,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -37,11 +42,13 @@ import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.ItemModel
 import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.UrlName
+import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
 import com.xdroid.app.changewallpaper.ui.theme.background
+import com.xdroid.app.changewallpaper.ui.theme.shimmerColor3
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.enums.Status
@@ -62,18 +69,78 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = koinViewModel()
 
-    val states by homeViewModel.imageResponse.collectAsState(initial = Resource.idle())
+    val states by homeViewModel.imageResponse.collectAsState()
+    val isDataLoaded = rememberSaveable { mutableStateOf(false) }
 
-
-    LaunchedEffect(Unit) {
-        homeViewModel.getAllImage()
+    if (!isDataLoaded.value) {
+        DebugMode.e("askdjhaksjdhjasdahsd ${isDataLoaded.value}")
+        LaunchedEffect(Unit) {
+            homeViewModel.getAllImage() // Set as loaded to prevent future calls
+        }
     }
-    val itemModel = remember { mutableStateOf(ItemModel()) }
-    var showView by remember { mutableStateOf(false) }
-    var showAlert by remember { mutableStateOf(false) }
-    var alertMessage by remember { mutableStateOf("") }
-    var myImages by remember { mutableStateOf(ArrayList<MyItems>()) }
+    val itemModel = rememberSaveable { mutableStateOf(ItemModel()) }
+    var showView by rememberSaveable { mutableStateOf(false) }
+    var showAlert by rememberSaveable { mutableStateOf(false) }
+    var alertMessage by rememberSaveable { mutableStateOf("") }
+    val myImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
+    val dataImages by remember { mutableStateOf(ArrayList<MyItems>()) }
 
+
+    when (states.status) {
+        Status.ERROR -> {
+            LaunchedEffect(Unit) {
+                showView = false
+                alertMessage = states.message ?: "Something went wrong"
+                showAlert = true
+            }
+        }
+
+        Status.SUCCESS -> {
+            LaunchedEffect(Unit) {
+                if (!isDataLoaded.value) {
+                    val response = DynamicResponse.myObject<ItemModel>(states.data)
+                    DebugMode.e("data loaded $response")
+                    itemModel.value = response
+                    isDataLoaded.value = true
+                    if (itemModel.value.items?.size!! > 0)
+                        for (data in itemModel.value.items!!) {
+                            val id = data.id
+                            val colID = data.collectionID
+                            for (img in data.images!!) {
+                                dataImages.add(
+                                    MyItems(
+                                        collectionID = colID,
+                                        id = id,
+                                        image = img
+                                    )
+                                )
+                            }
+                            myImages.addAll(dataImages.shuffled(Random()))
+
+
+                        }
+
+                    showView = true
+                    showAlert = false
+                }
+            }
+        }
+
+        Status.IDLE -> {
+            showView = false
+            DebugMode.e("data Idle state")
+
+
+        }
+
+        Status.LOADING -> {
+            showView = false
+
+            DebugMode.e("data loading state")
+
+
+        }
+    }
 
     Scaffold() {
         Column(
@@ -85,67 +152,18 @@ fun HomeScreen(
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
 
-            when (states.status) {
-                Status.ERROR -> {
-                    LaunchedEffect(Unit) {
-                        showView = false
-                        alertMessage = states.message ?: "Something went wrong"
-                        showAlert = true
-                    }
-                }
+            if (!showView)
+                LoadingContent()
+//                    CircularProgressIndicator(color = Color.White)
 
-                Status.SUCCESS -> {
-                    LaunchedEffect(Unit) {
-                        val response = DynamicResponse.myObject<ItemModel>(states.data)
-                        DebugMode.e("my data $response")
-                        itemModel.value = response
-                        if (itemModel.value.items?.size!! > 0)
-                            for (data in itemModel.value.items!!) {
-                                val id = data.id
-                                val colID = data.collectionID
-                                for (img in data.images!!) {
-                                    myImages.add(
-                                        MyItems(
-                                            collectionID = colID,
-                                            id = id,
-                                            image = img
-                                        )
-                                    )
-                                }
-                            }
-
-                        showView = true
-                        showAlert = false
-                    }
-                }
-
-                Status.IDLE -> {
-                    showView = false
-
-
-                }
-
-                Status.LOADING -> {
-                    showView = false
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(background)
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceAround,
-                    ) {
-                        CircularProgressIndicator(color = Color.White)
-                    }
-
-                }
-            }
-            if (showView)
+            if (showView) {
+                DebugMode.e("Show view $showView")
                 if (itemModel.value.items?.size!! > 0)
                     ActionsItemList(
-                        items = myImages.shuffled(Random()),
+                        items = myImages,
                         navController = navController
                     )
+            }
 
             if (showAlert) {
                 InfoAlertDialog(message = alertMessage) {
@@ -169,22 +187,70 @@ fun ActionsItemList(
     // Assuming a fixed item width, adjust the number of columns based on screen width
     val itemWidth = 120.dp // Set the desired width for each item
     val count = (screenWidth / itemWidth).toInt()
+
+    val newitems = remember(items) {
+        itemsWithAds(items)
+    }
+
 //    val count = 2
-    LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Fixed(count),
-        verticalItemSpacing = 2.dp,
+//    LazyVerticalStaggeredGrid
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(count),
+//        verticalItemSpacing = 2.dp,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 
-        if (items != null)
-            items(items.size) { index ->
-                val images = "${items[index].collectionID}/${items[index].id}/${items[index].image}"
+//        if (items != null)
+//            items(items.size) { index ->
+//                val images = "${items[index].collectionID}/${items[index].id}/${items[index].image}"
+//                val rememberImages = remember {
+//                    images
+//                }
+//                ActionItems(rememberImages, navController)
+//            }
+
+
+        DebugMode.e("regenerate  ${newitems.size} increase?")
+        items(newitems.size, key = { index ->
+            (if (newitems[index] is MyItems) {
+                val ite = newitems[index] as MyItems
+                val images =
+                    "${ite.collectionID}/${ite.id}/${ite.image}"
+                images// or a unique identifier for MyItems
+            } else {
+                "ad_$index"  // Assign a unique key for ad items
+            })!!
+
+        }) { index ->
+            if (newitems[index] is MyItems) {
+                val ite = newitems[index] as MyItems
+                val images =
+                    "${ite.collectionID}/${ite.id}/${ite.image}"
                 val rememberImages = remember {
                     images
                 }
                 ActionItems(rememberImages, navController)
+            } else {
+                AdComposable()
             }
+
+        }
+
+
     }
+}
+
+fun itemsWithAds(items: List<MyItems>?): List<Any> {
+    val mixedList = mutableListOf<Any>()
+    items?.forEachIndexed { index, item ->
+        mixedList.add(item)
+        // Add an ad placeholder every `interval` items
+//        DebugMode.e("calculated Value ${(index + 1) % 15}")
+        if ((index + 1) % 15 == 0) {
+            mixedList.add("AdItem")
+        }
+    }
+    return mixedList
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -214,6 +280,7 @@ fun ActionItems(
     Column(
         modifier = modifier
             .padding(5.dp)
+            .clip(RoundedCornerShape(8.dp))
             .clickable {
                 navigate = true
 
@@ -222,44 +289,27 @@ fun ActionItems(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(10.dp))
-        if (isLoading) {
-            // Show the circular loading indicator while loading
-            CircularProgressIndicator(
-                color = Color.Gray
-            )
-        }
+//        if (isLoading) {
+//            // Show the circular loading indicator while loading
+//            SingleShimmer()
+//        }
         GlideImage(
             model = imageUrl,
             contentDescription = item,
-//            loading = placeholder(R.drawable.baseline_image_24),
-            transition = CrossFade,
-            modifier = Modifier.graphicsLayer { alpha = if (isLoading) 0f else 1f },
-            requestBuilderTransform = { requestBuilder ->
-                requestBuilder.listener(object : RequestListener<Drawable> {
+            loading = placeholder(R.drawable.shimmer_shape),
+//            transition = CrossFade,
+            modifier = Modifier
+                .height(250.dp)
+                .width(300.dp)
+//                    .graphicsLayer { alpha = if (isLoading) 0f else 1f }
+                .clip(
+                    RoundedCornerShape(8.dp)
+                ),
+            contentScale = ContentScale.FillHeight
 
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        model: Any,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        isLoading = false // Image loaded, hide indicator
-                        return false
-                    }
+            )
 
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        isLoading = false // Loading failed, hide indicator
-                        return false
-                    }
-                })
-            }
-        )
+
         Spacer(modifier = Modifier.height(5.dp))
 
 
@@ -305,3 +355,22 @@ fun ActionItems(
     }
 
 }
+
+
+@Composable
+fun AdComposable() {
+    Column( modifier = Modifier
+        .padding(5.dp)
+        .clip(RoundedCornerShape(8.dp)),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally) {
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+    ListBannerAdView()
+        Spacer(modifier = Modifier.height(5.dp))
+
+    }
+
+}
+

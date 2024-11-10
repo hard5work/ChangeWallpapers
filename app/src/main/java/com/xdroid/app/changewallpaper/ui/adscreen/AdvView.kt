@@ -2,14 +2,22 @@ package com.xdroid.app.changewallpaper.ui.adscreen
 
 import android.app.Activity
 import android.content.Context
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.appopen.AppOpenAd
@@ -17,6 +25,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.ui.activity.MainActivity
+import com.xdroid.app.changewallpaper.ui.layouts.SingleShimmer
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import java.util.Date
 
@@ -43,6 +52,52 @@ fun BannerAdView() {
         }
     )
 }
+
+
+@Composable
+fun ListBannerAdView() {
+
+    val context = LocalContext.current
+    val adUnitIds = context.getString(R.string.centerBanner)
+
+    var isLoading by remember { mutableStateOf(true) }
+    // Set the size of the ad container (100x100 dp)
+    //"ca-app-pub-3940256099942544/6300978111"
+    Column {
+
+
+    if(isLoading)
+        SingleShimmer()
+
+    AndroidView(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp)),
+        factory = { context ->
+            AdView(context).apply {
+                setAdSize(AdSize.MEDIUM_RECTANGLE)
+                // Add your adUnitID, this is for testing.
+                adUnitId = adUnitIds
+                // Set a listener to know when the ad is loaded
+                adListener = object : AdListener() {
+                    override fun onAdLoaded() {
+                        isLoading = false
+                    }
+
+                    override fun onAdFailedToLoad(error: LoadAdError) {
+                       isLoading = true
+                    }
+                }
+
+                loadAd(AdRequest.Builder().build())
+            }
+        },
+        update = { adView ->
+            adView.loadAd(AdRequest.Builder().build())
+        }
+    )
+    }
+}
+
 
 
 

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,10 +46,10 @@ import java.net.URL
 fun WallpaperChangerApp(imageUrl: String) {
 
     val networkHelper: NetworkHelper = koinInject()
-    val wallpaperChanged = remember { mutableStateOf(false) }
+    val wallpaperChanged = rememberSaveable{ mutableStateOf(false) }
     val wallpaperManager = WallpaperManager.getInstance(LocalContext.current)
-    val buttonClicked = remember { mutableStateOf(false) }
-    val isLoading = remember { mutableStateOf(false) }
+    val buttonClicked = rememberSaveable { mutableStateOf(false) }
+    val isLoading = rememberSaveable { mutableStateOf(false) }
 
     if (networkHelper.isNetworkConnected()) {
         if (mInterstitialAd == null)

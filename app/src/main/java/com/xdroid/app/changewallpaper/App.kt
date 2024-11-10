@@ -13,8 +13,11 @@ import com.google.android.gms.ads.appopen.AppOpenAd
 import com.xdroid.app.changewallpaper.di.module.appModule
 import com.xdroid.app.changewallpaper.di.module.repoModule
 import com.xdroid.app.changewallpaper.di.module.viewModelModule
+import com.xdroid.app.changewallpaper.ui.adscreen.OpenApp.isAdAvailable
 import com.xdroid.app.changewallpaper.ui.adscreen.OpenApp.loadAppOpenAd
+import com.xdroid.app.changewallpaper.ui.adscreen.OpenApp.showAppOpenAdIfAvailable
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
+import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.PreferenceHelper
 import org.koin.android.ext.koin.androidContext
@@ -24,7 +27,7 @@ import org.koin.core.context.stopKoin
 import java.io.File
 import java.util.Date
 
-class App: Application(), Application.ActivityLifecycleCallbacks {
+class App : Application(), Application.ActivityLifecycleCallbacks {
 
     private var appOpenAd: AppOpenAd? = null
     private var isShowingAd = false
@@ -63,37 +66,44 @@ class App: Application(), Application.ActivityLifecycleCallbacks {
         stopKoin()
     }
 
-     fun loadAppOpenAd() {
+    fun loadAppOpenAd() {
         val adRequest = AdRequest.Builder().build()
-         DebugMode.e("Loading the appppppppppppp")
-        AppOpenAd.load(
-            this, getString(R.string.openApp), adRequest,
-            object : AppOpenAd.AppOpenAdLoadCallback() {
-                override fun onAdLoaded(ad: AppOpenAd) {
-                    appOpenAd = ad
-                    loadTime = Date().time
+        var countAd = preferenceHelper.getValue(PrefConstant.OPENAPPAD, 0) as Int
 
-                    DebugMode.e("Data loaded the appppppppppppp")
-                    if (!isShowingAd)
-                    showAppOpenAdIfAvailable {
-                        isShowingAd = false
+        DebugMode.e("Loading the appppppppppppp")
+        if (countAd > 10)
+            AppOpenAd.load(
+                this, getString(R.string.openApp), adRequest,
+                object : AppOpenAd.AppOpenAdLoadCallback() {
+                    override fun onAdLoaded(ad: AppOpenAd) {
+                        appOpenAd = ad
+                        loadTime = Date().time
+                        if (!isShowingAd) {
+
+                            showAppOpenAdIfAvailable {
+                                isShowingAd = false
+
+                            }
+                        }
+                    }
+
+                    override fun onAdFailedToLoad(p0: LoadAdError) {
+
+                        DebugMode.e("Data failed the appppppppppppp ${p0.message}")
+                        // Handle the error
                     }
                 }
+            )
+        countAd++
+        preferenceHelper.setValue(PrefConstant.OPENAPPAD, countAd)
 
-                override fun onAdFailedToLoad(p0: LoadAdError) {
-
-                    DebugMode.e("Data failed the appppppppppppp ${p0.message}")
-                    // Handle the error
-                }
-            }
-        )
     }
 
     private fun isAdAvailable(): Boolean {
         return appOpenAd != null && (Date().time - loadTime) < 4 * 3600000 // 4 hours in milliseconds
     }
 
-    fun showAppOpenAdIfAvailable(onAdDismissed:()->Unit) {
+    fun showAppOpenAdIfAvailable(onAdDismissed: () -> Unit) {
         if (!isShowingAd && isAdAvailable()) {
             appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
@@ -111,9 +121,10 @@ class App: Application(), Application.ActivityLifecycleCallbacks {
                     isShowingAd = true
                 }
             }
+            preferenceHelper.setValue(PrefConstant.OPENAPPAD, 0)
             appOpenAd?.show(currentActivity!!)
         } else {
-                 onAdDismissed()
+            onAdDismissed()
         }
     }
 
