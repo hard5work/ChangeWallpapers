@@ -6,7 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,6 +57,7 @@ import com.xdroid.app.changewallpaper.utils.enums.Status
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.DynamicResponse
 import com.xdroid.app.changewallpaper.utils.vm.HomeViewModel
+import org.checkerframework.checker.units.qual.s
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.util.Random
@@ -83,7 +86,7 @@ fun HomeScreen(
     var showAlert by rememberSaveable { mutableStateOf(false) }
     var alertMessage by rememberSaveable { mutableStateOf("") }
     val myImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
-    val dataImages by remember { mutableStateOf(ArrayList<MyItems>()) }
+    val dataImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
 
 
     when (states.status) {
@@ -120,6 +123,8 @@ fun HomeScreen(
 
                         }
 
+                    DebugMode.e("data loaded ${myImages.size}")
+
                     showView = true
                     showAlert = false
                 }
@@ -147,7 +152,8 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(background)
-                .padding(16.dp),
+                .padding(top = 16.dp, bottom = 8.dp)
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -188,7 +194,7 @@ fun ActionsItemList(
     val itemWidth = 120.dp // Set the desired width for each item
     val count = (screenWidth / itemWidth).toInt()
 
-    val newitems = remember(items) {
+    val newitems = rememberSaveable(items) {
         itemsWithAds(items)
     }
 
@@ -210,6 +216,24 @@ fun ActionsItemList(
 //            }
 
 
+//        itemsIndexed(items!!) { index, data ->
+//            // After every 9 items (or every 3 rows), add a full-width ad
+//            DebugMode.e("data index $index")
+//            DebugMode.e("data index ${index % 5 == 0 && index != 0}")
+//            if (index % 6 == 0 && index != 0) {
+//                item(span = { GridItemSpan(3) }) { // Span full width of 3 columns
+//                    AdComposable()
+//                }
+//            }
+//
+//                val images =
+//                    "${data.collectionID}/${data.id}/${data.image}"
+//                val rememberImages = remember {
+//                    images
+//                }
+//                ActionItems(rememberImages, navController)
+//
+//        }
         DebugMode.e("regenerate  ${newitems.size} increase?")
         items(newitems.size, key = { index ->
             (if (newitems[index] is MyItems) {
@@ -219,6 +243,13 @@ fun ActionsItemList(
                 images// or a unique identifier for MyItems
             } else {
                 "ad_$index"  // Assign a unique key for ad items
+            })!!
+
+        }, span = { index ->
+            (if (newitems[index] is MyItems) {
+                GridItemSpan(1) // or a unique identifier for MyItems
+            } else {
+                GridItemSpan(3)  // Assign a unique key for ad items
             })!!
 
         }) { index ->
@@ -307,7 +338,7 @@ fun ActionItems(
                 ),
             contentScale = ContentScale.FillHeight
 
-            )
+        )
 
 
         Spacer(modifier = Modifier.height(5.dp))
@@ -317,7 +348,7 @@ fun ActionItems(
 
     if (navigate) {
         val screen = ScreenName.Detail
-        if (counter < 5) {
+        if (counter < 150) {
             navController.navigate(
                 ScreenName.detailRoute(
                     screen,
@@ -359,15 +390,17 @@ fun ActionItems(
 
 @Composable
 fun AdComposable() {
-    Column( modifier = Modifier
-        .padding(5.dp)
-        .clip(RoundedCornerShape(8.dp)),
+    Column(
+        modifier = Modifier
+            .padding(5.dp)
+            .clip(RoundedCornerShape(8.dp)),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-    ListBannerAdView()
+        ListBannerAdView()
         Spacer(modifier = Modifier.height(5.dp))
 
     }

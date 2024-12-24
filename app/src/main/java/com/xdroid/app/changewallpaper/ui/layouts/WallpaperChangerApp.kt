@@ -17,11 +17,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -29,6 +32,8 @@ import com.xdroid.app.changewallpaper.data.UrlName
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
 import com.xdroid.app.changewallpaper.ui.adscreen.mInterstitialAd
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
+import com.xdroid.app.changewallpaper.ui.components.getScreenHeight
+import com.xdroid.app.changewallpaper.ui.components.getScreenWidth
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.theme.background
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
@@ -60,13 +65,16 @@ fun WallpaperChangerApp(imageUrl: String) {
             .fillMaxSize()
             .background(background)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(top = 16.dp, bottom = 8.dp)
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         GlideImage(
             model = imageUrl,
-            contentDescription = "Image"
+            contentDescription = "Image",
+            modifier = Modifier.width(getScreenWidth().dp).height(getScreenHeight().dp),
+            contentScale = ContentScale.FillHeight
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (!isLoading.value) {

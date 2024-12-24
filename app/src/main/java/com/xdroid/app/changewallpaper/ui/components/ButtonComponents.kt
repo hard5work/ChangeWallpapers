@@ -169,6 +169,17 @@ fun getScreenWidth(): Float {
     // Note: screenWidthDp.value gives you the float value of dp
     return screenWidthDp.value - 32
 }
+@Composable
+fun getScreenHeight(): Float {
+    // Access the current configuration to get the screen width
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenHeightDp.dp
+
+    // Calculate half of the screen width
+    // Note: screenWidthDp.value gives you the float value of dp
+    return screenWidthDp.value - 100
+}
+
 
 @Composable
 fun getScreenWidthResponsive(): Float {

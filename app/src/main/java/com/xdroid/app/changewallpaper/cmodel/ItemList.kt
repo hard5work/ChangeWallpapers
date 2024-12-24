@@ -1,6 +1,7 @@
 package com.xdroid.app.changewallpaper.cmodel
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 
 data class ItemModel(
@@ -35,4 +36,4 @@ data class MyItems(
     val id: String? = null,
     val image: String? = null
 
-)
+):Serializable

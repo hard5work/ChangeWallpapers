@@ -25,6 +25,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.ui.activity.MainActivity
+import com.xdroid.app.changewallpaper.ui.layouts.ShimmerAdPlaceHolder
 import com.xdroid.app.changewallpaper.ui.layouts.SingleShimmer
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import java.util.Date
@@ -62,22 +63,20 @@ fun ListBannerAdView() {
 
     var isLoading by remember { mutableStateOf(true) }
     // Set the size of the ad container (100x100 dp)
-    //"ca-app-pub-3940256099942544/6300978111"
     Column {
 
 
     if(isLoading)
-        SingleShimmer()
+        ShimmerAdPlaceHolder()
 
     AndroidView(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp)),
         factory = { context ->
             AdView(context).apply {
-                setAdSize(AdSize.MEDIUM_RECTANGLE)
-                // Add your adUnitID, this is for testing.
+//                setAdSize(adSize)
+                setAdSize(AdSize.LARGE_BANNER)
                 adUnitId = adUnitIds
-                // Set a listener to know when the ad is loaded
                 adListener = object : AdListener() {
                     override fun onAdLoaded() {
                         isLoading = false
