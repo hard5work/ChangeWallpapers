@@ -3,13 +3,19 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven { url 'https://cboost.jfrog.io/artifactory/chartboost-ads/' }
     }
+}
+ext {
+    googlePlayServicesVersion = '18.3.0'
+    googlePlayAdsVersion = '18.0.1'
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://cboost.jfrog.io/artifactory/chartboost-ads/' }
     }
 }
 rootProject.name = "Change Wallpapers"

@@ -1,26 +1,35 @@
 package com.xdroid.app.changewallpaper.ui.activity
 
 import android.app.Activity
-import android.os.Build
+import android.app.AlertDialog
+import android.os.Build.VERSION.SDK
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.runtime.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,31 +38,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.chartboost.sdk.Chartboost.startWithAppId
+import com.chartboost.sdk.callbacks.StartCallback
+import com.chartboost.sdk.events.StartError
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.BuildConfig
+import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView
-import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
-import com.xdroid.app.changewallpaper.ui.adscreen.removeInterstitial
+import com.xdroid.app.changewallpaper.ui.adscreen.mInterstitialAd
+import com.xdroid.app.changewallpaper.ui.adscreen.showInterstialAds
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.layouts.MyApp
-import com.xdroid.app.changewallpaper.ui.layouts.ShimmerPlaceholder
 import com.xdroid.app.changewallpaper.ui.theme.ChangeWallpapersTheme
 import com.xdroid.app.changewallpaper.ui.theme.background
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import org.koin.android.ext.android.inject
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import org.koin.java.KoinJavaComponent.inject
-import java.sql.Time
 import java.util.Locale
+
 
 class MainActivity : ComponentActivity() {
 
@@ -65,38 +81,62 @@ class MainActivity : ComponentActivity() {
 //        OpenApp.showAppOpenAdIfAvailable(this)
         enableEdgeToEdge()
 
+
         App.preferenceHelper.setValue(PrefConstant.COUNTER, 0)
         // Start the 15-minute countdown timer
-        loadInterstitial(this)
-//        timer = object : CountDownTimer(15 * 60 * 1000, 1000) { // 15 minutes
-//            override fun onTick(millisUntilFinished: Long) {
-//                val minutes = (millisUntilFinished / 1000) / 60
-//                val seconds = (millisUntilFinished / 1000) % 60
-//                val time = String.format(Locale.ENGLISH, "%02d:%02d", minutes, seconds)
+        if (mInterstitialAd == null)
+            loadInterstitial(this)
+        timer = object : CountDownTimer(15 * 60 * 1000, 1000) { // 15 minutes
+            override fun onTick(millisUntilFinished: Long) {
+                val minutes = (millisUntilFinished / 1000) / 60
+                val seconds = (millisUntilFinished / 1000) % 60
+                val time = String.format(Locale.ENGLISH, "%02d:%02d", minutes, seconds)
 //                DebugMode.e("Time Left $time")
-//            }
-//
-//            override fun onFinish() {
-//                showInterstitial(this@MainActivity) {
-//                    timer.start()
-//                }
-//            }
-//        }
-//        timer.start()
+            }
+
+            override fun onFinish() {
+                val dialog = AlertDialog.Builder(this@MainActivity)
+                dialog.setTitle("Scrolling for too long")
+                dialog.setMessage("Take a small break to continue.")
+                dialog.setCancelable(false)
+                dialog.setPositiveButton("View an ad") { dialog, _ ->
+                    // Handle OK button click
+                    if (mInterstitialAd == null) {
+                        loadInterstitial(this@MainActivity) { _ ->
+                            showInterstitial(this@MainActivity) {
+                                timer.start()
+                            }
+                        }
+
+                    } else {
+                        showInterstitial(this@MainActivity) {
+                            timer.start()
+                        }
+                    }
+//                    showInterstialAds()
+                    dialog.dismiss() // Close the dialog
+                }
+                dialog.show()
+
+
+            }
+        }
+        timer.start()
 
         setContent {
             ChangeWallpapersTheme {
                 // A surface container using the 'background' color from the theme
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    backgroundColor = background,
-                ) { padding ->
+                Surface(modifier = Modifier.fillMaxSize()) {
 
-                    Column(modifier = Modifier.padding(padding)) {
+
+                    Column(
+                        modifier = Modifier
+                    ) {
                         AppUpdate()
 //                        MainScreen()
 
                     }
+
                 }
             }
         }
@@ -111,36 +151,79 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val networkHelper: NetworkHelper = koinInject()
-    Column() {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        )
-        {
-            MyApp()
 
-        }
-        Text(
-            text = "[${BuildConfig.VERSION_NAME}] (${BuildConfig.VERSION_CODE})",
-            textAlign = TextAlign.Center,
-            color = Color.LightGray,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 5.dp)
-        )
+//    var showBanner by remember {
+//        mutableStateOf(false)
+//    }
+
+//    val myScope = CoroutineScope(Dispatchers.IO + Job())
+//    LaunchedEffect(Unit) {
+//        myScope.launch {
+//            delay(5000)
+//            // Perform an action
+//            showBanner = true
+//            DebugMode.e("Loading for 5000 secconds.....")
+//
+//        }
+//    }
 
 
-        if (networkHelper.isNetworkConnected()) {
+// Cancel the scope when done
+
+//    if (showBanner)
+
+
+    Scaffold { paddingValues ->
+
+
+        Column(modifier = Modifier.padding(paddingValues)) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .weight(1f)
             )
             {
-                BannerAdView()
+                MyApp()
+
             }
+            Text(
+                text = "[${BuildConfig.VERSION_NAME}] (${BuildConfig.VERSION_CODE})",
+                textAlign = TextAlign.Center,
+                color = Color.LightGray,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(background)
+                    .padding(vertical = 5.dp)
+            )
+
+
+            if (networkHelper.isNetworkConnected()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                {
+                    BannerAdView()
+//                    BannerAdView2()
+                }
+            }
+
+////        if (showBanner)
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//            )
+//            {
+//
+//                BannerAdView2()
+////                BannerAdView3()
+//
+//            }
         }
+
     }
+//    loadInterstitialAds()
+
 }
 
 
@@ -198,6 +281,7 @@ fun AppUpdate() {
         mutableStateOf(false)
     }
 
+    MainScreen()
     // Register for activity result to handle the update request
     val updateLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -208,7 +292,7 @@ fun AppUpdate() {
 
     // Check for app updates
     LaunchedEffect(Unit) {
-//        DebugMode.e("is update available $isUpdateAvailable")
+        //        DebugMode.e("is update available $isUpdateAvailable")
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
         appUpdateInfoTask.addOnFailureListener {
@@ -258,7 +342,7 @@ fun AppUpdate() {
     if (isUpdateDownloaded) {
         showAlert = true
     }
-    MainScreen()
+
 
 
     if (showAlert) {

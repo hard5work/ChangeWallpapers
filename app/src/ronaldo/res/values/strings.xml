@@ -5,5 +5,8 @@
     <string name="interstital">ca-app-pub-1456759243536077/7298672648</string>
     <string name="openApp">ca-app-pub-1456759243536077/1783098416</string>
     <string name="centerBanner">ca-app-pub-1456759243536077/1591526725</string>
+    <string name="appId">677bfd53172e16f67afff1e9</string>
+    <string name="appSignature">299d6add4dd9c560c431cef1788eccd5a18ece27</string>
+    <string name="bannerLocation">ronaldoBanner</string>
 
 </resources>

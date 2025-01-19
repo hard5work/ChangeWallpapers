@@ -34,6 +34,7 @@ data class MyItems(
     val collectionID: String? = null,
 
     val id: String? = null,
-    val image: String? = null
+    val image: String? = null,
+    val created: String? = null,
 
 ):Serializable

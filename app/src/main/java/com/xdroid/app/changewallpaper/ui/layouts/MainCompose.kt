@@ -21,7 +21,7 @@ fun MyApp() {
     /*All navigation are included here and all navigation are done from here.*/
     /*Add new route to app for navigation*/
 
-    var lastVisitedScreen by rememberSaveable { mutableStateOf(ScreenName.Home) }
+//    var lastVisitedScreen by rememberSaveable { mutableStateOf(ScreenName.Home) }
 
     val currentScreen by rememberSaveable { mutableStateOf(ScreenName.Home) }
     NavHost(navController, startDestination = currentScreen) {
@@ -30,13 +30,14 @@ fun MyApp() {
         }
         composable(ScreenName.Detail + "?url={url}") { backstack ->
             val movieUrl = backstack.arguments?.getString("url") ?: ""
-            WallpaperChangerApp(movieUrl)
+            WallpaperChangerApp(navController,movieUrl)
         }
 
     }
-    LaunchedEffect(navController) {
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            lastVisitedScreen = destination.route ?:ScreenName.Home
-        }
-    }
+
+//    LaunchedEffect(navController) {
+//        navController.addOnDestinationChangedListener { _, destination, _ ->
+//            lastVisitedScreen = destination.route ?:ScreenName.Home
+//        }
+//    }
 }

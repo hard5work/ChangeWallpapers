@@ -1,7 +1,11 @@
 package com.xdroid.app.changewallpaper.ui.layouts
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -39,13 +43,23 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.chartboost.sdk.impl.ad
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.R
+import com.xdroid.app.changewallpaper.cmodel.AdModel
 import com.xdroid.app.changewallpaper.cmodel.ItemModel
 import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.UrlName
+import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView2
 import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
+import com.xdroid.app.changewallpaper.ui.components.AutoAdSliderNetwork
+import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
@@ -56,6 +70,7 @@ import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.enums.Status
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.DynamicResponse
+import com.xdroid.app.changewallpaper.utils.helpers.isNull
 import com.xdroid.app.changewallpaper.utils.vm.HomeViewModel
 import org.checkerframework.checker.units.qual.s
 import org.koin.androidx.compose.koinViewModel
@@ -75,11 +90,14 @@ fun HomeScreen(
     val states by homeViewModel.imageResponse.collectAsState()
     val isDataLoaded = rememberSaveable { mutableStateOf(false) }
 
-    if (!isDataLoaded.value) {
-        DebugMode.e("askdjhaksjdhjasdahsd ${isDataLoaded.value}")
-        LaunchedEffect(Unit) {
-            homeViewModel.getAllImage() // Set as loaded to prevent future calls
+    val adBanner by homeViewModel.adBanner.collectAsState(null)
+
+    LaunchedEffect(Unit) {
+        if (!isDataLoaded.value) {
+            homeViewModel.getAllImage()
+            homeViewModel.getADList()// Set as loaded to prevent future calls
         }
+
     }
     val itemModel = rememberSaveable { mutableStateOf(ItemModel()) }
     var showView by rememberSaveable { mutableStateOf(false) }
@@ -89,6 +107,7 @@ fun HomeScreen(
     val dataImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
 
 
+    var showExit by rememberSaveable { mutableStateOf(false) }
     when (states.status) {
         Status.ERROR -> {
             LaunchedEffect(Unit) {
@@ -102,19 +121,20 @@ fun HomeScreen(
             LaunchedEffect(Unit) {
                 if (!isDataLoaded.value) {
                     val response = DynamicResponse.myObject<ItemModel>(states.data)
-                    DebugMode.e("data loaded $response")
                     itemModel.value = response
                     isDataLoaded.value = true
                     if (itemModel.value.items?.size!! > 0)
                         for (data in itemModel.value.items!!) {
                             val id = data.id
                             val colID = data.collectionID
+                            val createdAt = data.created
                             for (img in data.images!!) {
                                 dataImages.add(
                                     MyItems(
                                         collectionID = colID,
                                         id = id,
-                                        image = img
+                                        image = img,
+                                        created = createdAt
                                     )
                                 )
                             }
@@ -122,8 +142,6 @@ fun HomeScreen(
 
 
                         }
-
-                    DebugMode.e("data loaded ${myImages.size}")
 
                     showView = true
                     showAlert = false
@@ -133,7 +151,7 @@ fun HomeScreen(
 
         Status.IDLE -> {
             showView = false
-            DebugMode.e("data Idle state")
+//            DebugMode.e("data Idle state")
 
 
         }
@@ -141,9 +159,25 @@ fun HomeScreen(
         Status.LOADING -> {
             showView = false
 
-            DebugMode.e("data loading state")
+//            DebugMode.e("data loading state")
 
 
+        }
+    }
+
+    val context = LocalContext.current
+    BackHandler {
+        showExit = true
+    }
+    if (showExit) {
+        CustomAlertDialog(
+            title = "Exit",
+            message = "Are you sure you want close the app?",
+            onConfirmButtonClick = {
+                showExit = false
+                closeApp(context)
+            }) {
+            showExit = false
         }
     }
 
@@ -158,16 +192,18 @@ fun HomeScreen(
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
 
+
             if (!showView)
                 LoadingContent()
 //                    CircularProgressIndicator(color = Color.White)
 
             if (showView) {
-                DebugMode.e("Show view $showView")
+//                DebugMode.e("Show view $showView")
                 if (itemModel.value.items?.size!! > 0)
                     ActionsItemList(
                         items = myImages,
-                        navController = navController
+                        navController = navController,
+                        adBanner = adBanner
                     )
             }
 
@@ -184,7 +220,8 @@ fun HomeScreen(
 @Composable
 fun ActionsItemList(
     items: List<MyItems>?,
-    navController: NavController
+    navController: NavController,
+    adBanner: AdModel? = null
 ) {
     // Get the screen width
     val configuration = LocalConfiguration.current
@@ -196,6 +233,48 @@ fun ActionsItemList(
 
     val newitems = rememberSaveable(items) {
         itemsWithAds(items)
+    }
+
+    val context = LocalContext.current
+    val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
+
+    // Keep track of the loading state
+    var isLoading by rememberSaveable { mutableStateOf(true) }
+    var isAdError by rememberSaveable { mutableStateOf(false) }
+
+    // Use a static AdView instance to avoid recreation
+    val adView = remember {
+        AdView(context).apply {
+            setAdSize(AdSize.LARGE_BANNER)
+            adUnitId = adUnitIds
+        }
+    }
+
+    // Set the AdListener only once
+    DisposableEffect(adView) {
+        val adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                DebugMode.e("Banner ad load success")
+                isLoading = false
+                isAdError = false
+            }
+
+            override fun onAdFailedToLoad(error: LoadAdError) {
+                DebugMode.e("Banner ad load Failed-> ${error.message}")
+                isLoading = false
+                isAdError = true
+            }
+        }
+        adView.adListener = adListener
+
+        onDispose {
+            adView.adListener = object : AdListener() {}
+        }
+    }
+
+    // Load the ad only once
+    LaunchedEffect(adView) {
+        adView.loadAd(AdRequest.Builder().build())
     }
 
 //    val count = 2
@@ -234,12 +313,13 @@ fun ActionsItemList(
 //                ActionItems(rememberImages, navController)
 //
 //        }
-        DebugMode.e("regenerate  ${newitems.size} increase?")
+//        DebugMode.e("regenerate  ${newitems.size} increase?")
+
         items(newitems.size, key = { index ->
             (if (newitems[index] is MyItems) {
                 val ite = newitems[index] as MyItems
                 val images =
-                    "${ite.collectionID}/${ite.id}/${ite.image}"
+                    "${ite.collectionID}/${index}/${ite.id}/${ite.created}/${index * 0.1}/${ite.image}"
                 images// or a unique identifier for MyItems
             } else {
                 "ad_$index"  // Assign a unique key for ad items
@@ -262,7 +342,8 @@ fun ActionsItemList(
                 }
                 ActionItems(rememberImages, navController)
             } else {
-                AdComposable()
+                AdComposable(adView, isLoading, isAdError, adBanner)
+
             }
 
         }
@@ -280,6 +361,7 @@ fun itemsWithAds(items: List<MyItems>?): List<Any> {
         if ((index + 1) % 15 == 0) {
             mixedList.add("AdItem")
         }
+
     }
     return mixedList
 }
@@ -313,6 +395,7 @@ fun ActionItems(
             .padding(5.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable {
+
                 navigate = true
 
             },
@@ -348,12 +431,13 @@ fun ActionItems(
 
     if (navigate) {
         val screen = ScreenName.Detail
-        if (counter < 150) {
+        navigate = false
+        if (counter < 10) {
             navController.navigate(
                 ScreenName.detailRoute(
                     screen,
 //                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
-                    UrlName.imageUrl + item
+                    Uri.parse(UrlName.imageUrl + item).toString()
                 )
             )
             counter += 1
@@ -376,7 +460,6 @@ fun ActionItems(
                 counter = App.preferenceHelper.getValue(PrefConstant.COUNTER, 0) as Int
             }
         }
-        navigate = false
 
 
     }
@@ -389,7 +472,7 @@ fun ActionItems(
 
 
 @Composable
-fun AdComposable() {
+fun AdComposable(adView: AdView, isLoading: Boolean, isAdError: Boolean, adBanner: AdModel?) {
     Column(
         modifier = Modifier
             .padding(5.dp)
@@ -400,10 +483,34 @@ fun AdComposable() {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        ListBannerAdView()
+        BannerAdView2()
+        AdSection(adBanner)
+        ListBannerAdView(adView, isLoading, isAdError)
+
         Spacer(modifier = Modifier.height(5.dp))
 
     }
 
 }
 
+
+fun closeApp(context: Context) {
+    // Use the appropriate method to close the app
+    // Example for an Activity:
+    (context as Activity).finish()
+}
+
+
+@Composable
+fun AdSection(adBanner: AdModel? = null) {
+    if (adBanner != null) {
+        if (adBanner.items?.isNotEmpty().isNull()) {
+            val ban = adBanner.items!!
+            if (ban.isNotEmpty()) {
+                AutoAdSliderNetwork(banner = ban)
+            }
+        }
+    }
+
+
+}

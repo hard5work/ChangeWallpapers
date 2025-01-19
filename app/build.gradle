@@ -48,38 +48,38 @@ android {
             applicationIdSuffix = ".srk"
             dimension = "environment"
             // You can customize different aspects of the flavor, such as applicationId, versionCode, versionName, etc.
-            versionCode = 5
-            versionName = "1.0.4"
+            versionCode = 7
+            versionName = "1.0.7"
         }
 
         create("salman") {
 
             applicationIdSuffix = ".salman"
-            versionCode = 4
+            versionCode = 6
             dimension = "environment"
-            versionName = "1.0.2"
+            versionName = "1.0.6"
 
         }
         create("anime") {
             applicationIdSuffix = ".anime"
-            versionCode = 10
+            versionCode = 14 //13
             dimension = "environment"
-            versionName = "1.0.10"
+            versionName = "1.0.14" //13
 
         }
 
         create("artistic") {
             applicationIdSuffix = ".artistic"
-            versionCode = 1
+            versionCode = 5
             dimension = "environment"
-            versionName = "1.0.1"
+            versionName = "1.0.5"
 
         }
         create("all") {
             applicationIdSuffix = ".all"
-            versionCode = 1
+            versionCode = 4
             dimension = "environment"
-            versionName = "1.0.0"
+            versionName = "1.0.4"
 
         }
 
@@ -94,15 +94,15 @@ android {
         }
         create("ronaldo") {
             applicationIdSuffix = ".ronaldo"
-            versionCode = 2
+            versionCode = 5
             dimension = "environment"
-            versionName = "1.0.2"
+            versionName = "1.0.5"
         }
         create("messi") {
             applicationIdSuffix = ".messi"
-            versionCode = 2
+            versionCode = 4
             dimension = "environment"
-            versionName = "1.0.2"
+            versionName = "1.0.4"
         }
         create("anim") {
             applicationIdSuffix = ".anim"
@@ -140,7 +140,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.9.3'
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
-    implementation 'androidx.compose.material:material:1.7.5'
+//    implementation 'androidx.compose.material:material:1.7.5'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
@@ -195,4 +195,12 @@ dependencies {
 
     //Google Ad
     implementation 'com.google.android.gms:play-services-ads:23.5.0'
+    //CharBoost
+    implementation 'com.chartboost:chartboost-sdk:9.8.1'
+    implementation ("com.google.android.gms:play-services-base:18.5.0"){
+        exclude group: 'com.android.support'
+    }
+    implementation ("com.google.android.gms:play-services-ads-identifier:18.2.0"){
+        exclude group: 'com.android.support'
+    }
 }

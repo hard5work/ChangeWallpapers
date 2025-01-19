@@ -8,5 +8,8 @@
     <string name="interstital">ca-app-pub-1456759243536077/9275771826</string>
     <string name="openApp">ca-app-pub-1456759243536077/3080483194</string>
     <string name="centerBanner">ca-app-pub-1456759243536077/4085580700</string>
+    <string name="appId">677a3b264443758883efb865</string>
+    <string name="appSignature">59cdbdd6c6c1bb749cd93cd4f19dba395bef6442</string>
+    <string name="bannerLocation">bannerAnime</string>
 
 </resources>

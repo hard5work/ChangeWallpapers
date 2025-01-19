@@ -3,7 +3,6 @@ package com.xdroid.app.changewallpaper.ui.dialogs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Colors
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -117,7 +116,6 @@ fun ErrorSnackbar(
 fun CustomAlertDialog(
     title: String,
     message: String,
-    image: Painter,
     confirmButtonText: String = "Ok",
     dismissButtonText: String = "Cancel",
     onConfirmButtonClick: () -> Unit,
@@ -125,8 +123,6 @@ fun CustomAlertDialog(
 ) {
     AlertDialog(
         onDismissRequest = { },
-
-        containerColor = Color.Black,
         properties = DialogProperties(dismissOnClickOutside = true),
         title = {
             Row(
@@ -134,16 +130,16 @@ fun CustomAlertDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Image(
-                    painter = image,
-                    contentDescription = null,
-                )
-                /* Spacer(modifier = Modifier.width(16.dp))
+//                Image(
+//                    painter = image,
+//                    contentDescription = null,
+//                )
+//                Spacer(modifier = Modifier.width(16.dp))
              Text(
                  text = title,
                  fontSize = 20.sp,
                  fontWeight = FontWeight.Bold
-             )*/
+             )
             }
         },
         text = {

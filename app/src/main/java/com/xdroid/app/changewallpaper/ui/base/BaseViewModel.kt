@@ -6,16 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonObject
 import com.xdroid.app.changewallpaper.App
+import com.xdroid.app.changewallpaper.cmodel.AdModel
 import com.xdroid.app.changewallpaper.cmodel.DefaultRequestModel
 import com.xdroid.app.changewallpaper.cmodel.ErrorModel
+import com.xdroid.app.changewallpaper.data.UrlName
 import com.xdroid.app.changewallpaper.data.repository.MainRepository
 import com.xdroid.app.changewallpaper.utils.constants.NetworkError
 import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
+import com.xdroid.app.changewallpaper.utils.helpers.DynamicResponse
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
 import com.xdroid.app.changewallpaper.utils.helpers.PreferenceHelper
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel(
@@ -34,6 +38,17 @@ abstract class BaseViewModel(
         get() = error
 
 
+    private var adBannerRequest = MutableStateFlow<Resource<JsonObject>>(Resource.idle())
+
+    val adBannerResponse: StateFlow<Resource<JsonObject>>
+        get() = adBannerRequest
+
+
+    private var _adBanner = MutableStateFlow<AdModel?>(null)
+    val adBanner: StateFlow<AdModel?>
+        get() = getAdModel()
+
+
     fun getCompositeDisposable() = compositeDisposable
 
 
@@ -50,6 +65,21 @@ abstract class BaseViewModel(
     fun clearError() {
         _errorMessage.value = null
     }
+
+
+    fun getADList(
+    ) {
+        val requestModel = DefaultRequestModel()
+        requestModel.url = UrlName.adUrl
+        requestModel.setToken = false
+        requestGetMethodDispose(requestModel, adBannerRequest)
+    }
+
+    private fun getAdModel(): MutableStateFlow<AdModel?> {
+        _adBanner.value = DynamicResponse.myObject<AdModel>(adBannerResponse.value.data)
+        return _adBanner
+    }
+
 
     override fun onCleared() {
         super.onCleared()
@@ -86,8 +116,6 @@ abstract class BaseViewModel(
             }
         }
     }
-
-
 
 
     fun requestPutMethod(

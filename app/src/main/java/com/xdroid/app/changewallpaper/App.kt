@@ -4,6 +4,16 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import com.chartboost.sdk.Chartboost
+import com.chartboost.sdk.Chartboost.startWithAppId
+import com.chartboost.sdk.LoggingLevel
+import com.chartboost.sdk.callbacks.StartCallback
+import com.chartboost.sdk.events.StartError
+import com.chartboost.sdk.privacy.model.CCPA
+import com.chartboost.sdk.privacy.model.COPPA
+import com.chartboost.sdk.privacy.model.GDPR
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -44,6 +54,15 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         loadInterstitial(this)
         loadAppOpenAd()
         registerActivityLifecycleCallbacks(this)
+        Chartboost.addDataUseConsent(this, GDPR(GDPR.GDPR_CONSENT.BEHAVIORAL));
+        Chartboost.addDataUseConsent(this, CCPA(CCPA.CCPA_CONSENT.OPT_IN_SALE));
+        Chartboost.addDataUseConsent(this, COPPA(true));
+        val ids = arrayOf<String>(
+            getString(R.string.appId),
+            getString(R.string.appSignature)
+        ) // anime data
+//        val ids = arrayOf<String>("4f7b433509b6025804000002","dd2d41b69ac01b80f443f5b6cf06096d457f82bd") //Test Data
+        initSDK(ids)
         startKoin() {
             androidLogger()
             androidContext(this@App)
@@ -66,11 +85,36 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         stopKoin()
     }
 
+
+    private fun initSDK(ids: Array<String>) {
+        val appId = ids[0]
+        val appSignature = ids[1]
+        startWithAppId(
+            applicationContext, appId, appSignature,
+            StartCallback { startError: StartError? ->
+                if (startError == null) {
+                    Log.e(
+                        "Test",
+                        "SDK INITIALIZED"
+                    )
+
+                } else {
+                    val initException: Exception = startError.exception!!
+                    if (initException != null) {
+                        Log.e(
+                            "Test",
+                            "initSDK exception: " + initException + " init error code: " + startError.code
+                        )
+                    }
+
+                }
+            })
+        Chartboost.setLoggingLevel(LoggingLevel.ALL)
+    }
+
     fun loadAppOpenAd() {
         val adRequest = AdRequest.Builder().build()
         var countAd = preferenceHelper.getValue(PrefConstant.OPENAPPAD, 0) as Int
-
-        DebugMode.e("Loading the appppppppppppp")
         if (countAd > 10)
             AppOpenAd.load(
                 this, getString(R.string.openApp), adRequest,
@@ -88,8 +132,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
                     }
 
                     override fun onAdFailedToLoad(p0: LoadAdError) {
-
-                        DebugMode.e("Data failed the appppppppppppp ${p0.message}")
                         // Handle the error
                     }
                 }
