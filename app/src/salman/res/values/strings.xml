@@ -10,5 +10,10 @@
 <!--ca-app-pub-3940256099942544/9214589741-->
     <string name="test_ad_id">ca-app-pub-3940256099942544/9214589741</string>
     <string name="test_ad_id_2">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="openApp">ca-app-pub-1456759243536077/3364345184</string>
+    <string name="centerBanner">ca-app-pub-1456759243536077/3899236653</string>
+    <string name="appId">678c66ba2842da965e9bfc70</string>
+    <string name="appSignature">b4732e3a3ae0af5b1449d60bd48da0a5343958b3</string>
+    <string name="bannerLocation">salmanBanner</string>
 
 </resources>

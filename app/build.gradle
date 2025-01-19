@@ -55,9 +55,9 @@ android {
         create("salman") {
 
             applicationIdSuffix = ".salman"
-            versionCode = 6
+            versionCode = 7
             dimension = "environment"
-            versionName = "1.0.6"
+            versionName = "1.0.7"
 
         }
         create("anime") {
@@ -77,9 +77,9 @@ android {
         }
         create("all") {
             applicationIdSuffix = ".all"
-            versionCode = 4
+            versionCode = 5
             dimension = "environment"
-            versionName = "1.0.4"
+            versionName = "1.0.5"
 
         }
 
@@ -100,9 +100,9 @@ android {
         }
         create("messi") {
             applicationIdSuffix = ".messi"
-            versionCode = 4
+            versionCode = 5
             dimension = "environment"
-            versionName = "1.0.4"
+            versionName = "1.0.5"
         }
         create("anim") {
             applicationIdSuffix = ".anim"
