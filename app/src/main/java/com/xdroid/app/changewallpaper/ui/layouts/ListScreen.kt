@@ -128,6 +128,7 @@ fun HomeScreen(
                             val id = data.id
                             val colID = data.collectionID
                             val createdAt = data.created
+                            dataImages.clear()
                             for (img in data.images!!) {
                                 dataImages.add(
                                     MyItems(
@@ -432,7 +433,7 @@ fun ActionItems(
     if (navigate) {
         val screen = ScreenName.Detail
         navigate = false
-        if (counter < 10) {
+        if (counter < 5) {
             navController.navigate(
                 ScreenName.detailRoute(
                     screen,

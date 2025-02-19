@@ -217,7 +217,7 @@ fun getScreenHeight(): Float {
 
     // Calculate half of the screen width
     // Note: screenWidthDp.value gives you the float value of dp
-    return screenWidthDp.value - 100
+    return screenWidthDp.value - 250 //100 to 150
 }
 
 

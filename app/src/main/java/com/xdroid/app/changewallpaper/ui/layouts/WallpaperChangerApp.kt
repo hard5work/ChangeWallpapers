@@ -91,7 +91,7 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
             .verticalScroll(rememberScrollState())
             .padding(top = 16.dp, bottom = 8.dp)
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         GlideImage(

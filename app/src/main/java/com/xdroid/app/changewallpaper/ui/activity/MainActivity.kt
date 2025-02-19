@@ -126,11 +126,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             ChangeWallpapersTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize()) {
+                Surface(modifier = Modifier.fillMaxSize().background(background)) {
 
 
                     Column(
-                        modifier = Modifier
+                        modifier = Modifier.background(background),
+
                     ) {
                         AppUpdate()
 //                        MainScreen()
@@ -173,7 +174,7 @@ fun MainScreen() {
 //    if (showBanner)
 
 
-    Scaffold { paddingValues ->
+    Scaffold(modifier = Modifier.background(background)) { paddingValues ->
 
 
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -201,6 +202,7 @@ fun MainScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(background)
                 )
                 {
                     BannerAdView()

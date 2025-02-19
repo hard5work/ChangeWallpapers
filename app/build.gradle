@@ -112,6 +112,14 @@ android {
 
         }
 
+        create("kdrama") {
+            applicationIdSuffix = ".kdrama"
+            versionCode = 1
+            dimension = "environment"
+            versionName = "1.0.1"
+
+        }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
