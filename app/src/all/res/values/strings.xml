@@ -11,6 +11,8 @@
     <!--    <string name="test_ad_id_2">ca-app-pub-3940256099942544/1033173712</string>-->
     <string name="openApp">ca-app-pub-1456759243536077/5120279987</string>
     <string name="centerBanner">ca-app-pub-1456759243536077/6315879957</string>
+    <string name="rewardAds">ca-app-pub-1456759243536077/7754376674</string>
+    <string name="nativeAds">ca-app-pub-1456759243536077/7926607380</string>
     <string name="appId">678c6aac2842da965e9bfc75</string>
     <string name="appSignature">f7a6d12b1b517b36ce3ca787b11f6c4d5eb40d65</string>
     <string name="bannerLocation">mobileBanner</string>

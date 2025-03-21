@@ -66,6 +66,7 @@ import com.xdroid.app.changewallpaper.ui.theme.black
 import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
+import com.xdroid.app.changewallpaper.utils.vm.SharedViewModel
 import org.koin.compose.koinInject
 import java.util.Random
 import kotlin.text.Typography.quote
@@ -74,7 +75,7 @@ import kotlin.text.Typography.quote
 @Composable
 fun SettingScreen(
     navController: NavController,
-    imageUri: String?
+    viewModel: SharedViewModel
 ) {
 
     val context = LocalContext.current
@@ -99,7 +100,7 @@ fun SettingScreen(
     val networkHelper: NetworkHelper = koinInject()
     var isDataLoaded by rememberSaveable { mutableStateOf(false) }
     var showRewards by rememberSaveable { mutableStateOf(false) }
-    val myImage = Gson().fromJson(imageUri, ListItems::class.java)
+    val myImage = viewModel.getUserData() ?: ListItems(items = emptyList())
     var finalImage by rememberSaveable { mutableStateOf("") }
     val myImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
 

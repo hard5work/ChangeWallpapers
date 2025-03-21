@@ -90,6 +90,7 @@ import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.DynamicResponse
 import com.xdroid.app.changewallpaper.utils.helpers.isNull
 import com.xdroid.app.changewallpaper.utils.vm.HomeViewModel
+import com.xdroid.app.changewallpaper.utils.vm.SharedViewModel
 import org.checkerframework.checker.units.qual.s
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -99,9 +100,10 @@ import java.util.Random
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
-    navController: NavController
+    navController: NavController,
 //    dashVM: DashVM = koinInject(),
 //    navigateToDetail: (WatchlistMovie) -> Unit
+    viewModel: SharedViewModel
 ) {
     val homeViewModel: HomeViewModel = koinViewModel()
 
@@ -267,21 +269,27 @@ fun HomeScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(context.getString(R.string.app_name), fontSize = 18.sp, color = black)
+                                Text(
+                                    context.getString(R.string.app_name),
+                                    fontSize = 18.sp,
+                                    color = black
+                                )
                                 IconButton(onClick = {
                                     //                        navController.navigate(ScreenName.Settings)
                                     //                        ${ite.collectionID}/${ite.id}/${ite.image}
                                     val listItems = ListItems(items = myImages)
 
                                     val string = Gson().toJson(listItems).toString()
-                                    navController.navigate(
-                                        ScreenName.detailRoute(
-                                            ScreenName.Settings,
-                                            //                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
-                                            Uri.parse(string)
-                                                .toString()
-                                        )
-                                    )
+//                                    navController.navigate(
+//                                        ScreenName.detailRoute(
+//                                            ScreenName.Settings,
+//                                            //                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
+//                                            Uri.parse(string)
+//                                                .toString()
+//                                        )
+//                                    )
+                                    viewModel.setUserData(listItems)
+                                    navController.navigate(ScreenName.Settings)
                                 }) {
                                     Icon(
                                         Icons.AutoMirrored.Default.Help,

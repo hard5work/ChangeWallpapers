@@ -8,6 +8,93 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:975122007842:android:18660684cce78fe2a2477b",
+        "android_client_info": {
+          "package_name": "com.xdroid.app.changewallpaper.all"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChG3EikrQYzvrGvxbAOGx7wg8T5GIGpQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975122007842:android:261bc41e5e679930a2477b",
+        "android_client_info": {
+          "package_name": "com.xdroid.app.changewallpaper.anime"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChG3EikrQYzvrGvxbAOGx7wg8T5GIGpQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975122007842:android:3cdb78da336f88afa2477b",
+        "android_client_info": {
+          "package_name": "com.xdroid.app.changewallpaper.artistic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChG3EikrQYzvrGvxbAOGx7wg8T5GIGpQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:975122007842:android:1864b3a9a167ffdaa2477b",
         "android_client_info": {
           "package_name": "com.xdroid.app.changewallpaper.kdrama"

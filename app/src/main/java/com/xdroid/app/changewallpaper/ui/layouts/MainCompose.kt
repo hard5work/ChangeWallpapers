@@ -13,6 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
 import com.xdroid.app.changewallpaper.utils.helpers.PreferenceHelper
+import com.xdroid.app.changewallpaper.utils.vm.SharedViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -22,19 +24,19 @@ fun MyApp() {
     /*Add new route to app for navigation*/
 
 //    var lastVisitedScreen by rememberSaveable { mutableStateOf(ScreenName.Home) }
+    val viewModel: SharedViewModel = koinViewModel()
 
     val currentScreen by rememberSaveable { mutableStateOf(ScreenName.Home) }
     NavHost(navController, startDestination = currentScreen) {
         composable(ScreenName.Home) {
-            HomeScreen(navController)
+            HomeScreen(navController, viewModel)
         }
         composable(ScreenName.Detail + "?url={url}") { backstack ->
             val image = backstack.arguments?.getString("url") ?: ""
             WallpaperChangerApp(navController, image)
         }
-        composable(ScreenName.Settings+ "?url={url}") { backstack ->
-            val image = backstack.arguments?.getString("url") ?: ""
-            SettingScreen(navController,image)
+        composable(ScreenName.Settings) {
+            SettingScreen(navController,viewModel)
         }
 
     }

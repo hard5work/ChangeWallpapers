@@ -8,5 +8,7 @@
     <string name="appId">677bfd53172e16f67afff1e9</string>
     <string name="appSignature">299d6add4dd9c560c431cef1788eccd5a18ece27</string>
     <string name="bannerLocation">ronaldoBanner</string>
+    <string name="rewardAds">ca-app-pub-1456759243536077/5186222964</string>
+    <string name="nativeAds">ca-app-pub-1456759243536077/7014309959</string>
 
 </resources>
