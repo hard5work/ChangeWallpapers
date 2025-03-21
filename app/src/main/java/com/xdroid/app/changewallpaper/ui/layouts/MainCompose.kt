@@ -29,8 +29,12 @@ fun MyApp() {
             HomeScreen(navController)
         }
         composable(ScreenName.Detail + "?url={url}") { backstack ->
-            val movieUrl = backstack.arguments?.getString("url") ?: ""
-            WallpaperChangerApp(navController,movieUrl)
+            val image = backstack.arguments?.getString("url") ?: ""
+            WallpaperChangerApp(navController, image)
+        }
+        composable(ScreenName.Settings+ "?url={url}") { backstack ->
+            val image = backstack.arguments?.getString("url") ?: ""
+            SettingScreen(navController,image)
         }
 
     }

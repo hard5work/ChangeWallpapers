@@ -9,6 +9,9 @@
     <string name="interstital">ca-app-pub-1456759243536077/4219806137</string>
     <string name="openApp">ca-app-pub-1456759243536077/2553800743</string>
     <string name="centerBanner">ca-app-pub-1456759243536077/1856900396</string>
+    <string name="appId">67ca7ca645bc9f72a0a0b6a6</string>
+    <string name="appSignature">7c71459a1f6a3376641ec9d285e75c01e9e9b42c</string>
+    <string name="bannerLocation">centerBanner</string>
 <!--ca-app-pub-3940256099942544/9214589741-->
     <string name="test_ad_id">ca-app-pub-3940256099942544/9214589741</string>
     <string name="test_ad_id_2">ca-app-pub-3940256099942544/1033173712</string>

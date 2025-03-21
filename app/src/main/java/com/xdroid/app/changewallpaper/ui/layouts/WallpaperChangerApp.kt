@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,7 +38,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.google.android.gms.ads.nativead.NativeAd
+import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.data.UrlName
+import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
+import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
 import com.xdroid.app.changewallpaper.ui.adscreen.mInterstitialAd
 import com.xdroid.app.changewallpaper.ui.adscreen.removeInterstitial
@@ -46,6 +51,7 @@ import com.xdroid.app.changewallpaper.ui.components.getScreenHeight
 import com.xdroid.app.changewallpaper.ui.components.getScreenWidth
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.theme.background
+import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +76,16 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
     val isLoading = rememberSaveable { mutableStateOf(false) }
     var isDataLoaded by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
+    var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
+    var counter by remember {
+        mutableIntStateOf(App.preferenceHelper.getValue(PrefConstant.COUNTER, 0) as Int)
+    }
+    // Load the ad when the screen appears
+    LaunchedEffect(Unit) {
+        NativeAdManager.loadNativeAd(context) { ad ->
+            nativeAd = ad
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (networkHelper.isNetworkConnected()) {
@@ -81,7 +97,23 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
     }
 
     BackHandler {
-        navController.navigateUp()
+        if (counter == 4) {
+            if (mInterstitialAd == null) {
+                loadInterstitial(context) { _ ->
+                    showInterstitial(context) {
+                        navController.navigateUp()
+                    }
+                }
+
+            } else {
+                showInterstitial(context) {
+                    navController.navigateUp()
+                }
+            }
+        } else {
+            navController.navigateUp()
+        }
+
     }
 
     Column(
@@ -94,6 +126,7 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         GlideImage(
             model = imageUrl,
             contentDescription = "Image",
@@ -102,6 +135,12 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                 .height(getScreenHeight().dp),
             contentScale = ContentScale.FillHeight
         )
+        Spacer(modifier = Modifier.height(10.dp))
+//        if (nativeAd == null) {
+//            ShimmerAdPlaceHolder()
+//        } else {
+//            AdmobNativeAd(nativeAd)
+//        }
         Spacer(modifier = Modifier.height(10.dp))
         if (!isLoading.value) {
             Button(
@@ -150,6 +189,10 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                                     context = context,
                                     imageUrl, { success ->
                                         wallpaperChanged = success
+                                        if (!success){
+                                            isLoading.value = false
+                                            wallpaperChanged = false
+                                        }
 
                                     },
                                     wallpaperManager
@@ -164,7 +207,10 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                                 context = context,
                                 imageUrl, { success ->
                                     wallpaperChanged = success
-
+                                    if (!success){
+                                        isLoading.value = false
+                                        wallpaperChanged = false
+                                    }
                                 },
                                 wallpaperManager
                             )
@@ -178,6 +224,10 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                     context = context,
                     imageUrl, { success ->
                         wallpaperChanged = success
+                        if (!success){
+                            isLoading.value = false
+                            wallpaperChanged = false
+                        }
                     },
                     wallpaperManager
                 )
@@ -229,7 +279,7 @@ private fun changeWallpaper(
 
 }
 
-private fun changeWallpaper2(
+fun changeWallpaper2(
     context: Context,
     imageUrl: String,
     callback: (Boolean) -> Unit,
@@ -245,6 +295,10 @@ private fun changeWallpaper2(
                 .setTitle("Set Wallpaper")
                 .setItems(options) { _, which -> continuation.resume(which) }
                 .setCancelable(false)
+                .setNegativeButton("Cancel") { a, _ ->
+                    a.dismiss()
+                    callback(false)
+                }
                 .show()
         }
 

@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "975122007842",
+    "firebase_url": "https://usagenetwork-1e826.firebaseio.com",
+    "project_id": "usagenetwork-1e826",
+    "storage_bucket": "usagenetwork-1e826.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975122007842:android:1864b3a9a167ffdaa2477b",
+        "android_client_info": {
+          "package_name": "com.xdroid.app.changewallpaper.kdrama"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChG3EikrQYzvrGvxbAOGx7wg8T5GIGpQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975122007842:android:7f6888554464623fa2477b",
+        "android_client_info": {
+          "package_name": "com.xdroid.app.changewallpaper.messi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChG3EikrQYzvrGvxbAOGx7wg8T5GIGpQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975122007842:android:3a1edc9b1473b654a2477b",
+        "android_client_info": {
+          "package_name": "com.xdroid.app.changewallpaper.ronaldo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChG3EikrQYzvrGvxbAOGx7wg8T5GIGpQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "975122007842-akm40rde286352vc2tsjnul8jg3bd2il.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

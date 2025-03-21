@@ -37,4 +37,8 @@ data class MyItems(
     val image: String? = null,
     val created: String? = null,
 
-):Serializable
+    ) : Serializable
+
+data class ListItems(
+    val items: List<MyItems>
+) : Serializable

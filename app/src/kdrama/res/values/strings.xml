@@ -8,5 +8,7 @@
     <string name="appId">67b584d878e60c15e77b6ae3</string>
     <string name="appSignature">c7d922532efc772cc1077172e75e81785838de27</string>
     <string name="bannerLocation">mobileBanner</string>
+    <string name="nativeAds">ca-app-pub-1456759243536077/7535547534</string>
+    <string name="rewardAds">ca-app-pub-1456759243536077/4472934761</string>
 
 </resources>

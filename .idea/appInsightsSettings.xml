@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.xdroid.app.changewallpaper.kdrama" />
+                  <option name="mobileSdkAppId" value="1:975122007842:android:1864b3a9a167ffdaa2477b" />
+                  <option name="projectId" value="usagenetwork-1e826" />
+                  <option name="projectNumber" value="975122007842" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

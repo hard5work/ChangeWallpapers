@@ -17,9 +17,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -34,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -49,14 +52,19 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.nativead.NativeAd
+import com.google.gson.Gson
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.AdModel
 import com.xdroid.app.changewallpaper.cmodel.ItemModel
+import com.xdroid.app.changewallpaper.cmodel.ListItems
 import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.UrlName
+import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView2
 import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
+import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.components.AutoAdSliderNetwork
 import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialog
@@ -64,7 +72,9 @@ import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
 import com.xdroid.app.changewallpaper.ui.theme.background
+import com.xdroid.app.changewallpaper.ui.theme.black
 import com.xdroid.app.changewallpaper.ui.theme.shimmerColor3
+import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.enums.Status
@@ -143,10 +153,11 @@ fun HomeScreen(
 
 
                         }
-
-                    showView = true
-                    showAlert = false
                 }
+
+
+                showView = true
+                showAlert = false
             }
         }
 
@@ -193,6 +204,44 @@ fun HomeScreen(
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(white),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(context.getString(R.string.app_name), fontSize = 18.sp, color = black)
+                    IconButton(onClick = {
+//                        navController.navigate(ScreenName.Settings)
+//                        ${ite.collectionID}/${ite.id}/${ite.image}
+                        val listItems = ListItems(items = myImages)
+
+                        val string = Gson().toJson(listItems).toString()
+                        navController.navigate(
+                            ScreenName.detailRoute(
+                                ScreenName.Settings,
+//                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
+                                Uri.parse(string)
+                                    .toString()
+                            )
+                        )
+                    }) {
+                        Icon(
+                            Icons.AutoMirrored.Default.Help,
+                            contentDescription = "Help",
+                            tint = black
+                        )
+                    }
+                }
+            }
 
             if (!showView)
                 LoadingContent()
@@ -248,6 +297,14 @@ fun ActionsItemList(
         AdView(context).apply {
             setAdSize(AdSize.LARGE_BANNER)
             adUnitId = adUnitIds
+        }
+    }
+    var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
+
+    // Load the ad when the screen appears
+    LaunchedEffect(Unit) {
+        NativeAdManager.loadNativeAd(context) { ad ->
+            nativeAd = ad
         }
     }
 
@@ -316,6 +373,7 @@ fun ActionsItemList(
 //        }
 //        DebugMode.e("regenerate  ${newitems.size} increase?")
 
+
         items(newitems.size, key = { index ->
             (if (newitems[index] is MyItems) {
                 val ite = newitems[index] as MyItems
@@ -343,7 +401,7 @@ fun ActionsItemList(
                 }
                 ActionItems(rememberImages, navController)
             } else {
-                AdComposable(adView, isLoading, isAdError, adBanner)
+                AdComposable(adView, isLoading, isAdError, adBanner, nativeAd)
 
             }
 
@@ -412,7 +470,7 @@ fun ActionItems(
             model = imageUrl,
             contentDescription = item,
             loading = placeholder(R.drawable.shimmer_shape),
-//            transition = CrossFade,
+            transition = CrossFade,
             modifier = Modifier
                 .height(250.dp)
                 .width(300.dp)
@@ -473,7 +531,29 @@ fun ActionItems(
 
 
 @Composable
-fun AdComposable(adView: AdView, isLoading: Boolean, isAdError: Boolean, adBanner: AdModel?) {
+fun AdComposable(
+    adView: AdView,
+    isLoading: Boolean,
+    isAdError: Boolean,
+    adBanner: AdModel?,
+    nativeAd: NativeAd?
+) {
+    var nativeAd2 by remember { mutableStateOf<NativeAd?>(null) }
+
+
+    val context = LocalContext.current
+    // Load the ad when the screen appears
+    if (nativeAd == null) {
+        LaunchedEffect(Unit) {
+            NativeAdManager.loadNativeAd(context) { ad ->
+                nativeAd2 = ad
+            }
+        }
+    } else {
+        LaunchedEffect(Unit) {
+            nativeAd2 = nativeAd
+        }
+    }
     Column(
         modifier = Modifier
             .padding(5.dp)
@@ -486,7 +566,13 @@ fun AdComposable(adView: AdView, isLoading: Boolean, isAdError: Boolean, adBanne
 
         BannerAdView2()
         AdSection(adBanner)
-        ListBannerAdView(adView, isLoading, isAdError)
+        if (nativeAd2 == null) {
+            ShimmerAdPlaceHolder()
+        } else {
+            AdmobNativeAd(nativeAd2)
+        }
+//        AdmobNativeAd(nativeAd2)
+//        ListBannerAdView(adView, isLoading, isAdError)
 
         Spacer(modifier = Modifier.height(5.dp))
 

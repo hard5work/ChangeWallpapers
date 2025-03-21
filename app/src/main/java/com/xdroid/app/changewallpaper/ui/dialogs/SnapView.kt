@@ -3,19 +3,26 @@ package com.xdroid.app.changewallpaper.ui.dialogs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import com.xdroid.app.changewallpaper.R
+import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.components.ButtonComponent
 import com.xdroid.app.changewallpaper.ui.components.OutlineButtonComponent
 import kotlinx.coroutines.delay
@@ -135,17 +142,105 @@ fun CustomAlertDialog(
 //                    contentDescription = null,
 //                )
 //                Spacer(modifier = Modifier.width(16.dp))
-             Text(
-                 text = title,
-                 fontSize = 20.sp,
-                 fontWeight = FontWeight.Bold
-             )
+                Text(
+                    text = title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         },
         text = {
             Text(
                 text = message,
             )
+        },
+        confirmButton = {
+            Column() {
+
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    OutlineButtonComponent(
+                        label = dismissButtonText,
+                        onClick = { onDismissButtonClick() },
+                        width = 120
+
+                    )
+                    ButtonComponent(
+                        label = confirmButtonText,
+                        onClick = { onConfirmButtonClick() },
+                        width = 120
+
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+            }
+
+        },
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .wrapContentHeight(align = Alignment.CenterVertically)
+            .wrapContentWidth(align = Alignment.CenterHorizontally)
+
+
+    )
+}
+
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun CustomAlertDialogImage(
+    image: String,
+    title: String = "Reward",
+    message: String = "Enhance your device with this stunning wallpaper.",
+    confirmButtonText: String = "Ok",
+    dismissButtonText: String = "Cancel",
+    onConfirmButtonClick: () -> Unit = {},
+    onDismissButtonClick: () -> Unit={},
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        properties = DialogProperties(dismissOnClickOutside = true),
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        text = {
+            Column {
+
+                Text(
+                    text = message,
+                )
+                GlideImage(
+                    model = image,
+                    contentDescription = image,
+                    loading = placeholder(R.drawable.shimmer_shape),
+                    modifier = Modifier
+                        .height(250.dp)
+                        .width(300.dp)
+                        .clip(
+                            RoundedCornerShape(8.dp)
+                        ),
+                    contentScale = ContentScale.FillHeight
+
+                )
+
+            }
         },
         confirmButton = {
             Column() {
@@ -200,11 +295,11 @@ fun InfoAlertDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-             Text(
-                 text = "App Info",
-                 fontSize = 20.sp,
-                 fontWeight = FontWeight.Bold
-             )
+                Text(
+                    text = "App Info",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         },
         text = {
@@ -260,7 +355,7 @@ fun LoadingAlertDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                  CircularProgressIndicator()
+                    CircularProgressIndicator()
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))

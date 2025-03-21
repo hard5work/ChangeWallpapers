@@ -1,7 +1,9 @@
 package com.xdroid.app.changewallpaper.ui.activity
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.os.Build
 import android.os.Build.VERSION.SDK
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -19,10 +21,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,16 +58,21 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.BuildConfig
+import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView
+import com.xdroid.app.changewallpaper.ui.adscreen.RewardedAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
 import com.xdroid.app.changewallpaper.ui.adscreen.mInterstitialAd
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstialAds
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.layouts.MyApp
+import com.xdroid.app.changewallpaper.ui.screens.ScreenName
 import com.xdroid.app.changewallpaper.ui.theme.ChangeWallpapersTheme
+import com.xdroid.app.changewallpaper.ui.theme.backGroundColor
 import com.xdroid.app.changewallpaper.ui.theme.background
+import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
@@ -86,7 +101,8 @@ class MainActivity : ComponentActivity() {
         // Start the 15-minute countdown timer
         if (mInterstitialAd == null)
             loadInterstitial(this)
-        timer = object : CountDownTimer(15 * 60 * 1000, 1000) { // 15 minutes
+        RewardedAdManager.loadAd(this)
+        timer = object : CountDownTimer(5 * 60 * 1000, 1000) { // 15 minutes
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = (millisUntilFinished / 1000) / 60
                 val seconds = (millisUntilFinished / 1000) % 60
@@ -121,18 +137,27 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+
         timer.start()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
 
         setContent {
             ChangeWallpapersTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize().background(background)) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(background)
+                ) {
 
 
                     Column(
                         modifier = Modifier.background(background),
 
-                    ) {
+                        ) {
                         AppUpdate()
 //                        MainScreen()
 
@@ -145,13 +170,21 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    private val requestPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (!isGranted) {
+                // Handle case where permission is denied
+            }
+        }
 
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val networkHelper: NetworkHelper = koinInject()
+    val context = LocalContext.current
 
 //    var showBanner by remember {
 //        mutableStateOf(false)

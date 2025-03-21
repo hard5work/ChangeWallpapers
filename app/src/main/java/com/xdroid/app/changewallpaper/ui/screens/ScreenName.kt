@@ -19,6 +19,7 @@ object ScreenName {
     const val Offer = "Offer"
     const val Profile = "Profile"
     const val Detail = "Detail"
+    const val Settings = "Settings"
 
     //Services
     const val DataPack = "DataPack"
