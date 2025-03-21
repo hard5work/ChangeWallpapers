@@ -14,6 +14,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -56,6 +58,12 @@ import com.xdroid.app.changewallpaper.BuildConfig
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.AdItem
 import com.xdroid.app.changewallpaper.data.UrlName
+import com.xdroid.app.changewallpaper.ui.theme.black
+import com.xdroid.app.changewallpaper.ui.theme.colorPrimary
+import com.xdroid.app.changewallpaper.ui.theme.latoBold8
+import com.xdroid.app.changewallpaper.ui.theme.latoLight8
+import com.xdroid.app.changewallpaper.ui.theme.latoRegular12
+import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.isNull
 import kotlinx.coroutines.delay
@@ -326,9 +334,47 @@ fun AutoAdSliderNetwork(banner: List<AdItem>, modifier: Modifier = Modifier) {
                         .fillMaxWidth()
                         .height(120.dp)
                         .align(Alignment.Center)
-                        .clip(RoundedCornerShape(18.dp))
-                        .padding(vertical = 10.dp),
+                        .clip(RoundedCornerShape(10.dp)),
                 )
+                Row(
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .background(black)
+                        .align(Alignment.TopStart),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("AD", style = latoBold8.copy(color = white), modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp))
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp)
+                        .align(Alignment.BottomCenter),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button (
+                        modifier = Modifier
+                            .height(30.dp)
+                            .padding(horizontal = 8.dp),
+                        onClick = {
+                            openLinkInBrowser(context, imagePainter.link.isNull())
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = black),
+                        border = BorderStroke(1.dp, colorPrimary), // Border color and width
+                        content = {
+                            Text(
+                                "Learn More", color = white, style = latoRegular12
+                            )
+                        },
+
+
+                        shape = RoundedCornerShape(25.dp),
+                    )
+
+                }
             }
         }
     }

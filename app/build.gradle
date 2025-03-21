@@ -51,38 +51,38 @@ android {
             applicationIdSuffix = ".srk"
             dimension = "environment"
             // You can customize different aspects of the flavor, such as applicationId, versionCode, versionName, etc.
-            versionCode = 7
-            versionName = "1.0.7"
+            versionCode = 8
+            versionName = "1.0.8"
         }
 
         create("salman") {
 
             applicationIdSuffix = ".salman"
-            versionCode = 7
+            versionCode = 8
             dimension = "environment"
-            versionName = "1.0.7"
+            versionName = "1.0.8"
 
         }
         create("anime") {
             applicationIdSuffix = ".anime"
-            versionCode = 16 //13
+            versionCode = 17 //13
             dimension = "environment"
-            versionName = "1.0.16" //13
+            versionName = "1.0.17" //13
 
         }
 
         create("artistic") {
             applicationIdSuffix = ".artistic"
-            versionCode = 5
+            versionCode = 6
             dimension = "environment"
-            versionName = "1.0.5"
+            versionName = "1.0.6"
 
         }
         create("all") {
             applicationIdSuffix = ".all"
-            versionCode = 5
+            versionCode = 6
             dimension = "environment"
-            versionName = "1.0.5"
+            versionName = "1.0.6"
 
         }
 
@@ -97,15 +97,15 @@ android {
         }
         create("ronaldo") {
             applicationIdSuffix = ".ronaldo"
-            versionCode = 6
+            versionCode = 7
             dimension = "environment"
-            versionName = "1.0.6"
+            versionName = "1.0.7"
         }
         create("messi") {
             applicationIdSuffix = ".messi"
-            versionCode = 6
+            versionCode = 7
             dimension = "environment"
-            versionName = "1.0.6"
+            versionName = "1.0.7"
         }
         create("anim") {
             applicationIdSuffix = ".anim"

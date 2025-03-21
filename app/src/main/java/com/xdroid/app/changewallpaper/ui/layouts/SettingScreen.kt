@@ -116,7 +116,6 @@ fun SettingScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Spacer(Modifier.height(10.dp))
 
         Row(
             modifier = Modifier

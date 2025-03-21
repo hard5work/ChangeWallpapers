@@ -23,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,11 +31,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -71,6 +78,7 @@ import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
+import com.xdroid.app.changewallpaper.ui.theme.backGroundColor
 import com.xdroid.app.changewallpaper.ui.theme.background
 import com.xdroid.app.changewallpaper.ui.theme.black
 import com.xdroid.app.changewallpaper.ui.theme.shimmerColor3
@@ -193,77 +201,112 @@ fun HomeScreen(
         }
     }
 
-    Scaffold() {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(background)
-                .padding(top = 16.dp, bottom = 8.dp)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(white),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(context.getString(R.string.app_name), fontSize = 18.sp, color = black)
-                    IconButton(onClick = {
-//                        navController.navigate(ScreenName.Settings)
-//                        ${ite.collectionID}/${ite.id}/${ite.image}
-                        val listItems = ListItems(items = myImages)
-
-                        val string = Gson().toJson(listItems).toString()
-                        navController.navigate(
-                            ScreenName.detailRoute(
-                                ScreenName.Settings,
-//                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
-                                Uri.parse(string)
-                                    .toString()
-                            )
-                        )
-                    }) {
-                        Icon(
-                            Icons.AutoMirrored.Default.Help,
-                            contentDescription = "Help",
-                            tint = black
-                        )
-                    }
-                }
-            }
-
-            if (!showView)
-                LoadingContent()
-//                    CircularProgressIndicator(color = Color.White)
-
-            if (showView) {
-//                DebugMode.e("Show view $showView")
-                if (itemModel.value.items?.size!! > 0)
-                    ActionsItemList(
-                        items = myImages,
-                        navController = navController,
-                        adBanner = adBanner
-                    )
-            }
-
-            if (showAlert) {
-                InfoAlertDialog(message = alertMessage) {
-                    showAlert = false
+    Surface {
+        val appBarMaxHeightPx = with(LocalDensity.current) { 170 }
+        val connection = remember(appBarMaxHeightPx) {
+            CollapsingAppBarNestedScrollConnection(appBarMaxHeightPx)
+        }
+        val density = LocalDensity.current
+        val spaceHeight by remember(density) {
+            derivedStateOf {
+                with(density) {
+                    (appBarMaxHeightPx + connection.appBarOffset).toDp()
                 }
             }
         }
 
+        Scaffold() {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(background)
+                    .padding(bottom = 2.dp)
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+
+
+                Box(Modifier.nestedScroll(connection)) {
+                    Column(
+                        modifier = Modifier
+                    ) {
+                        Spacer(
+                            Modifier
+                                .padding(4.dp)
+                                .height(spaceHeight)
+                        )
+
+                        if (!showView)
+                            LoadingContent()
+                        //                    CircularProgressIndicator(color = Color.White)
+
+                        if (showView) {
+                            //                DebugMode.e("Show view $showView")
+                            if (itemModel.value.items?.size!! > 0)
+                                ActionsItemList(
+                                    items = myImages,
+                                    navController = navController,
+                                    adBanner = adBanner
+                                )
+                        }
+                    }
+                    Column(modifier = Modifier.offset { IntOffset(0, connection.appBarOffset) }) {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(white),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 5.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(context.getString(R.string.app_name), fontSize = 18.sp, color = black)
+                                IconButton(onClick = {
+                                    //                        navController.navigate(ScreenName.Settings)
+                                    //                        ${ite.collectionID}/${ite.id}/${ite.image}
+                                    val listItems = ListItems(items = myImages)
+
+                                    val string = Gson().toJson(listItems).toString()
+                                    navController.navigate(
+                                        ScreenName.detailRoute(
+                                            ScreenName.Settings,
+                                            //                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
+                                            Uri.parse(string)
+                                                .toString()
+                                        )
+                                    )
+                                }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Default.Help,
+                                        contentDescription = "Help",
+                                        tint = black
+                                    )
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+
+
+
+
+                if (showAlert) {
+                    InfoAlertDialog(message = alertMessage) {
+                        showAlert = false
+                    }
+                }
+            }
+
+        }
     }
 }
 
@@ -469,7 +512,7 @@ fun ActionItems(
         GlideImage(
             model = imageUrl,
             contentDescription = item,
-            loading = placeholder(R.drawable.shimmer_shape),
+            loading = placeholder(R.drawable.rectange),
             transition = CrossFade,
             modifier = Modifier
                 .height(250.dp)
@@ -562,10 +605,12 @@ fun AdComposable(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(5.dp))
 
         BannerAdView2()
+        Spacer(modifier = Modifier.height(5.dp))
         AdSection(adBanner)
+        Spacer(modifier = Modifier.height(5.dp))
         if (nativeAd2 == null) {
             ShimmerAdPlaceHolder()
         } else {
@@ -600,4 +645,21 @@ fun AdSection(adBanner: AdModel? = null) {
     }
 
 
+}
+
+class CollapsingAppBarNestedScrollConnection(
+    val appBarMaxHeight: Int
+) : NestedScrollConnection {
+
+    var appBarOffset: Int by mutableIntStateOf(0)
+        private set
+
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        val delta = available.y.toInt()
+        val newOffset = appBarOffset + delta
+        val previousOffset = appBarOffset
+        appBarOffset = newOffset.coerceIn(-appBarMaxHeight, 0)
+        val consumed = appBarOffset - previousOffset
+        return Offset(0f, consumed.toFloat())
+    }
 }
