@@ -2,10 +2,14 @@ package com.xdroid.app.changewallpaper.ui.layouts
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,14 +19,18 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -68,13 +76,16 @@ import com.xdroid.app.changewallpaper.cmodel.ItemModel
 import com.xdroid.app.changewallpaper.cmodel.ListItems
 import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.UrlName
+import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView2
 import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
+import com.xdroid.app.changewallpaper.ui.adscreen.RewardedAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.components.AutoAdSliderNetwork
 import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialog
+import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialogImage
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
@@ -88,6 +99,7 @@ import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.enums.Status
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.DynamicResponse
+import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
 import com.xdroid.app.changewallpaper.utils.helpers.isNull
 import com.xdroid.app.changewallpaper.utils.vm.HomeViewModel
 import com.xdroid.app.changewallpaper.utils.vm.SharedViewModel
@@ -125,7 +137,21 @@ fun HomeScreen(
     var alertMessage by rememberSaveable { mutableStateOf("") }
     val myImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
     val dataImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
+    val wallpaperManager = WallpaperManager.getInstance(LocalContext.current)
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val wallpaperLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "Wallpaper Set Successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Wallpaper Setting Cancelled!", Toast.LENGTH_SHORT).show()
+        }
+    }
 
+    var finalImage by rememberSaveable { mutableStateOf("") }
+    var showRewards by rememberSaveable { mutableStateOf(false) }
 
     var showExit by rememberSaveable { mutableStateOf(false) }
     when (states.status) {
@@ -187,7 +213,8 @@ fun HomeScreen(
         }
     }
 
-    val context = LocalContext.current
+    val networkHelper: NetworkHelper = koinInject()
+
     BackHandler {
         showExit = true
     }
@@ -217,11 +244,36 @@ fun HomeScreen(
             }
         }
 
-        Scaffold() {
+        Scaffold(
+            floatingActionButton = {
+
+                FloatingActionButton(onClick = {
+                    if (networkHelper.isNetworkConnected()) {
+
+                        activity?.let {
+                            RewardedAdManager.showAd(it) { _ ->
+                                val ite = myImages[Random().nextInt(myImages.size)]
+                                val image = "${ite.collectionID}/${ite.id}/${ite.image}"
+                                finalImage = imageUrl + image
+                                DebugMode.e("Items in Settings $finalImage")
+                                showRewards = true
+                            }
+                        }
+//            }
+                    }
+                }, containerColor = white, modifier = Modifier.clip(CircleShape)) {
+                    Icon(
+                        Icons.Default.CardGiftcard,
+                        tint = black,
+                        contentDescription = "Reward Button"
+                    )
+                }
+            }
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(background)
+                    .background(black)
                     .padding(bottom = 2.dp)
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.Start,
@@ -275,20 +327,8 @@ fun HomeScreen(
                                     color = black
                                 )
                                 IconButton(onClick = {
-                                    //                        navController.navigate(ScreenName.Settings)
-                                    //                        ${ite.collectionID}/${ite.id}/${ite.image}
                                     val listItems = ListItems(items = myImages)
-
-                                    val string = Gson().toJson(listItems).toString()
-//                                    navController.navigate(
-//                                        ScreenName.detailRoute(
-//                                            ScreenName.Settings,
-//                                            //                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
-//                                            Uri.parse(string)
-//                                                .toString()
-//                                        )
-//                                    )
-                                    viewModel.setUserData(listItems)
+//                                    viewModel.setUserData(listItems)
                                     navController.navigate(ScreenName.Settings)
                                 }) {
                                     Icon(
@@ -315,6 +355,31 @@ fun HomeScreen(
             }
 
         }
+
+        if (showRewards) {
+            CustomAlertDialogImage(
+                image = finalImage,
+                confirmButtonText = "Change",
+                dismissButtonText = "Cancel",
+                onConfirmButtonClick = {
+                    showRewards = false
+                    changeWallpaper2(
+                        context,
+                        imageUrl = finalImage,
+                        callback = { success ->
+                            if (success)
+                                Toast.makeText(context, "Wallpaper Changed", Toast.LENGTH_SHORT)
+                                    .show()
+                        },
+                        wallpaperManager = wallpaperManager,
+                        launcher = wallpaperLauncher
+                    )
+                }
+            ) {
+                showRewards = false
+            }
+        }
+
     }
 }
 
@@ -502,7 +567,7 @@ fun ActionItems(
     var isLoading by remember { mutableStateOf(true) }
     Column(
         modifier = modifier
-            .padding(5.dp)
+            .padding(horizontal = 2.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable {
 
@@ -512,7 +577,7 @@ fun ActionItems(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+//        Spacer(modifier = Modifier.height(10.dp))
 //        if (isLoading) {
 //            // Show the circular loading indicator while loading
 //            SingleShimmer()
@@ -524,12 +589,13 @@ fun ActionItems(
             transition = CrossFade,
             modifier = Modifier
                 .height(250.dp)
-                .width(300.dp)
+                .width(450.dp)
+//                .fillMaxWidth()
 //                    .graphicsLayer { alpha = if (isLoading) 0f else 1f }
                 .clip(
                     RoundedCornerShape(8.dp)
                 ),
-            contentScale = ContentScale.FillHeight
+            contentScale = ContentScale.Crop
 
         )
 

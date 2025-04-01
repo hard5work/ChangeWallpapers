@@ -5,6 +5,8 @@ import android.app.WallpaperManager
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.AdsClick
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Reviews
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +50,7 @@ import com.google.android.play.core.review.ReviewManager
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.play.core.review.testing.FakeReviewManager
 import com.google.gson.Gson
+import com.xdroid.app.changewallpaper.BuildConfig
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.ListItems
 import com.xdroid.app.changewallpaper.cmodel.MyItems
@@ -90,7 +94,7 @@ fun SettingScreen(
 //    }
 
 
-    val reviewInfo = rememberReviewTask(reviewManager)
+//    val reviewInfo = rememberReviewTask(reviewManager)
 
     val wallpaperManager = WallpaperManager.getInstance(LocalContext.current)
 //    val reviewInfo = rememberFakeReviewTask(reviewManager)
@@ -103,7 +107,15 @@ fun SettingScreen(
     val myImage = viewModel.getUserData() ?: ListItems(items = emptyList())
     var finalImage by rememberSaveable { mutableStateOf("") }
     val myImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
-
+    val wallpaperLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "Wallpaper Set Successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Wallpaper Setting Cancelled!", Toast.LENGTH_SHORT).show()
+        }
+    }
     LaunchedEffect(Unit) {
         if (networkHelper.isNetworkConnected()) {
             RewardedAdManager.loadAd(context)
@@ -115,7 +127,7 @@ fun SettingScreen(
 
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(black)
     ) {
 
         Row(
@@ -164,15 +176,23 @@ fun SettingScreen(
                             "https://www.amazon.com/s?i=mobile-apps&rh=p_4%3AJoyful%2BJuncture&search-type=ss"
                         )
                     }
-                    ProfileMenu(Icons.Default.Reviews, "Review Our App") {
-                        reviewInfo?.let {
-                            reviewManager.launchReviewFlow(context as Activity, reviewInfo)
-                        }
+                    ProfileMenu(Icons.Default.Reviews, "Review Our App Playstore") {
+                        openLinkInBrowser(
+                            context,
+                            "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID.toString()}"
+                        )
                     }
-                    ProfileMenu(Icons.Default.AdsClick, "Watch Ads for surprise") {
-                        buttonClicked = true
-
-                    }
+//                    ProfileMenu(Icons.Default.Reviews, "Review Our App Amazon") {
+//                        openLinkInBrowser(
+//                            context,
+//                            "https://www.amazon.com/gp/product/B0DT6RYXQS"
+//                        )
+//                    }
+//                    ProfileMenu(Icons.Default.AdsClick, "Watch Ads for surprise") {
+//                        buttonClicked = true
+//
+//                    }
+                    ProfileMenu(Icons.Default.Info, "Version [${BuildConfig.VERSION_NAME}] (${BuildConfig.VERSION_CODE})")
                 }
             }
 
@@ -229,6 +249,7 @@ fun SettingScreen(
                             Toast.makeText(context, "Wallpaper Changed", Toast.LENGTH_SHORT).show()
                     },
                     wallpaperManager = wallpaperManager,
+                    launcher = wallpaperLauncher
                 )
             }
         ) {
@@ -304,13 +325,7 @@ fun rememberReviewTask(reviewManager: ReviewManager): ReviewInfo? {
         if (it.isSuccessful) {
             reviewInfo = it.result
         }
-        DebugMode.e("Log from revuew ${it.isSuccessful} ${it.result}")
-    }.addOnFailureListener {
-        DebugMode.e("Log from revuew ${it.message}")
     }
-        .addOnCanceledListener {
-            DebugMode.e("Log from revuew Cancelled")
-        }
 
 
     return reviewInfo
@@ -325,7 +340,6 @@ fun rememberFakeReviewTask(reviewManager: FakeReviewManager): ReviewInfo? {
         if (it.isSuccessful) {
             reviewInfo = it.result
         }
-        DebugMode.e("Log from revuew ${it.isSuccessful} ${it.result}")
     }
 
     return reviewInfo

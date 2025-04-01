@@ -72,6 +72,7 @@ import com.xdroid.app.changewallpaper.ui.screens.ScreenName
 import com.xdroid.app.changewallpaper.ui.theme.ChangeWallpapersTheme
 import com.xdroid.app.changewallpaper.ui.theme.backGroundColor
 import com.xdroid.app.changewallpaper.ui.theme.background
+import com.xdroid.app.changewallpaper.ui.theme.black
 import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
@@ -102,7 +103,7 @@ class MainActivity : ComponentActivity() {
         if (mInterstitialAd == null)
             loadInterstitial(this)
         RewardedAdManager.loadAd(this)
-        timer = object : CountDownTimer(5 * 60 * 1000, 1000) { // 15 minutes
+        timer = object : CountDownTimer(5 * 60 * 1000, 1000) { // 5 minutes
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = (millisUntilFinished / 1000) / 60
                 val seconds = (millisUntilFinished / 1000) % 60
@@ -150,14 +151,13 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(background)
+                        .background(black)
                 ) {
 
 
                     Column(
-                        modifier = Modifier.background(background),
 
-                        ) {
+                    ) {
                         AppUpdate()
 //                        MainScreen()
 
@@ -207,7 +207,7 @@ fun MainScreen() {
 //    if (showBanner)
 
 
-    Scaffold(modifier = Modifier.background(background)) { paddingValues ->
+    Scaffold(modifier = Modifier.background(black)) { paddingValues ->
 
 
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -220,22 +220,22 @@ fun MainScreen() {
                 MyApp()
 
             }
-            Text(
-                text = "[${BuildConfig.VERSION_NAME}] (${BuildConfig.VERSION_CODE})",
-                textAlign = TextAlign.Center,
-                color = Color.LightGray,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(background)
-                    .padding(vertical = 5.dp)
-            )
+//            Text(
+//                text = "[${BuildConfig.VERSION_NAME}] (${BuildConfig.VERSION_CODE})",
+//                textAlign = TextAlign.Center,
+//                color = Color.LightGray,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .background(background)
+//                    .padding(vertical = 5.dp)
+//            )
 
 
             if (networkHelper.isNetworkConnected()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(background)
+                        .background(black)
                 )
                 {
                     BannerAdView()

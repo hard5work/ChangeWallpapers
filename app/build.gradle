@@ -65,24 +65,24 @@ android {
         }
         create("anime") {
             applicationIdSuffix = ".anime"
-            versionCode = 17 //13
+            versionCode = 18 //13
             dimension = "environment"
-            versionName = "1.0.17" //13
+            versionName = "1.0.18" //13
 
         }
 
         create("artistic") {
             applicationIdSuffix = ".artistic"
-            versionCode = 6
+            versionCode = 7
             dimension = "environment"
-            versionName = "1.0.6"
+            versionName = "1.0.7"
 
         }
         create("all") {
             applicationIdSuffix = ".all"
-            versionCode = 6
+            versionCode = 7
             dimension = "environment"
-            versionName = "1.0.6"
+            versionName = "1.0.7"
 
         }
 
@@ -97,15 +97,15 @@ android {
         }
         create("ronaldo") {
             applicationIdSuffix = ".ronaldo"
-            versionCode = 7
+            versionCode = 8
             dimension = "environment"
-            versionName = "1.0.7"
+            versionName = "1.0.8"
         }
         create("messi") {
             applicationIdSuffix = ".messi"
-            versionCode = 7
+            versionCode = 8
             dimension = "environment"
-            versionName = "1.0.7"
+            versionName = "1.0.8"
         }
         create("anim") {
             applicationIdSuffix = ".anim"
@@ -117,9 +117,9 @@ android {
 
         create("kdrama") {
             applicationIdSuffix = ".kdrama"
-            versionCode = 3
+            versionCode = 5
             dimension = "environment"
-            versionName = "1.0.3"
+            versionName = "1.0.5"
 
         }
 

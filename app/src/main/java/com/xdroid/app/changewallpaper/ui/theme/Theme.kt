@@ -46,7 +46,7 @@ fun ChangeWallpapersTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            (view.context as Activity).window.statusBarColor = background.toArgb()
+            (view.context as Activity).window.statusBarColor = black.toArgb()
             ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = false
         }
     }
