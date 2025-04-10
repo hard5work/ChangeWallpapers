@@ -4,44 +4,56 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -57,18 +69,12 @@ import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
-import com.chartboost.sdk.impl.ad
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.nativead.NativeAd
-import com.google.gson.Gson
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.AdModel
@@ -79,23 +85,19 @@ import com.xdroid.app.changewallpaper.data.UrlName
 import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView2
-import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.RewardedAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.components.AutoAdSliderNetwork
-import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialogImage
+import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialogWithAds
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
-import com.xdroid.app.changewallpaper.ui.theme.backGroundColor
-import com.xdroid.app.changewallpaper.ui.theme.background
 import com.xdroid.app.changewallpaper.ui.theme.black
-import com.xdroid.app.changewallpaper.ui.theme.shimmerColor3
+import com.xdroid.app.changewallpaper.ui.theme.latoRegular12
 import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
-import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.enums.Status
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.DynamicResponse
@@ -103,7 +105,6 @@ import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
 import com.xdroid.app.changewallpaper.utils.helpers.isNull
 import com.xdroid.app.changewallpaper.utils.vm.HomeViewModel
 import com.xdroid.app.changewallpaper.utils.vm.SharedViewModel
-import org.checkerframework.checker.units.qual.s
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.util.Random
@@ -127,16 +128,18 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         if (!isDataLoaded.value) {
             homeViewModel.getAllImage()
-            homeViewModel.getADList()// Set as loaded to prevent future calls
         }
+        homeViewModel.getADList()// Set as loaded to prevent future calls
 
     }
-    val itemModel = rememberSaveable { mutableStateOf(ItemModel()) }
+    var itemModel by rememberSaveable { mutableStateOf(ItemModel()) }
     var showView by rememberSaveable { mutableStateOf(false) }
     var showAlert by rememberSaveable { mutableStateOf(false) }
     var alertMessage by rememberSaveable { mutableStateOf("") }
-    val myImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
-    val dataImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
+//    val myImages = remember { mutableStateListOf<MyItems>() }
+    val myImages by homeViewModel.myImages.collectAsState(initial = emptyList())
+
+    val dataImages = remember { mutableStateListOf<MyItems>() }
     val wallpaperManager = WallpaperManager.getInstance(LocalContext.current)
     val context = LocalContext.current
     val activity = context as? Activity
@@ -150,10 +153,14 @@ fun HomeScreen(
         }
     }
 
-    var finalImage by rememberSaveable { mutableStateOf("") }
+    var finalImage by remember { mutableStateOf("") }
     var showRewards by rememberSaveable { mutableStateOf(false) }
 
     var showExit by rememberSaveable { mutableStateOf(false) }
+
+//    if (itemModel.items != null) {
+//        createItemModel(itemModel, dataImages, myImages)
+//    }
     when (states.status) {
         Status.ERROR -> {
             LaunchedEffect(Unit) {
@@ -167,28 +174,9 @@ fun HomeScreen(
             LaunchedEffect(Unit) {
                 if (!isDataLoaded.value) {
                     val response = DynamicResponse.myObject<ItemModel>(states.data)
-                    itemModel.value = response
+                    itemModel = response
                     isDataLoaded.value = true
-                    if (itemModel.value.items?.size!! > 0)
-                        for (data in itemModel.value.items!!) {
-                            val id = data.id
-                            val colID = data.collectionID
-                            val createdAt = data.created
-                            dataImages.clear()
-                            for (img in data.images!!) {
-                                dataImages.add(
-                                    MyItems(
-                                        collectionID = colID,
-                                        id = id,
-                                        image = img,
-                                        created = createdAt
-                                    )
-                                )
-                            }
-                            myImages.addAll(dataImages.shuffled(Random()))
-
-
-                        }
+                    createItemModel(itemModel, dataImages, homeViewModel)
                 }
 
 
@@ -198,7 +186,6 @@ fun HomeScreen(
         }
 
         Status.IDLE -> {
-            showView = false
 //            DebugMode.e("data Idle state")
 
 
@@ -219,9 +206,11 @@ fun HomeScreen(
         showExit = true
     }
     if (showExit) {
-        CustomAlertDialog(
+        CustomAlertDialogWithAds(
             title = "Exit",
             message = "Are you sure you want close the app?",
+            dismissOnClickedOutside = false,
+            dismissOnBackPress = false,
             onConfirmButtonClick = {
                 showExit = false
                 closeApp(context)
@@ -230,6 +219,7 @@ fun HomeScreen(
         }
     }
 
+    isAmazonDevice()
     Surface {
         val appBarMaxHeightPx = with(LocalDensity.current) { 170 }
         val connection = remember(appBarMaxHeightPx) {
@@ -297,12 +287,16 @@ fun HomeScreen(
 
                         if (showView) {
                             //                DebugMode.e("Show view $showView")
-                            if (itemModel.value.items?.size!! > 0)
+                            if (myImages.size > 0)
                                 ActionsItemList(
                                     items = myImages,
                                     navController = navController,
                                     adBanner = adBanner
                                 )
+                            else {
+                                Text("No Data", color = white, style = latoRegular12)
+                            }
+
                         }
                     }
                     Column(modifier = Modifier.offset { IntOffset(0, connection.appBarOffset) }) {
@@ -327,8 +321,6 @@ fun HomeScreen(
                                     color = black
                                 )
                                 IconButton(onClick = {
-                                    val listItems = ListItems(items = myImages)
-//                                    viewModel.setUserData(listItems)
                                     navController.navigate(ScreenName.Settings)
                                 }) {
                                     Icon(
@@ -383,6 +375,38 @@ fun HomeScreen(
     }
 }
 
+fun createItemModel(
+    itemModel: ItemModel,
+    dataImages: SnapshotStateList<MyItems>,
+//    myImages: SnapshotStateList<MyItems>
+    viewModel: HomeViewModel
+) {
+
+    val items = ArrayList<MyItems>()
+    if (itemModel.items?.size!! > 0)
+        for (data in itemModel.items!!) {
+            val id = data.id
+            val colID = data.collectionID
+            val createdAt = data.created
+            dataImages.clear()
+            for (img in data.images!!) {
+                dataImages.add(
+                    MyItems(
+                        collectionID = colID,
+                        id = id,
+                        image = img,
+                        created = createdAt
+                    )
+                )
+            }
+            items.addAll(dataImages)
+
+
+        }
+
+    viewModel.setList(items)
+}
+
 @Composable
 fun ActionsItemList(
     items: List<MyItems>?,
@@ -397,16 +421,16 @@ fun ActionsItemList(
     val itemWidth = 120.dp // Set the desired width for each item
     val count = (screenWidth / itemWidth).toInt()
 
-    val newitems = rememberSaveable(items) {
+    val newitems = remember(items) {
         itemsWithAds(items)
     }
 
     val context = LocalContext.current
-    val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
+    val adUnitIds = remember { context.getString(R.string.centerBanner) }
 
     // Keep track of the loading state
-    var isLoading by rememberSaveable { mutableStateOf(true) }
-    var isAdError by rememberSaveable { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    var isAdError by remember { mutableStateOf(false) }
 
     // Use a static AdView instance to avoid recreation
     val adView = remember {
@@ -736,4 +760,10 @@ class CollapsingAppBarNestedScrollConnection(
         val consumed = appBarOffset - previousOffset
         return Offset(0f, consumed.toFloat())
     }
+}
+
+fun isAmazonDevice(): Boolean {
+    val manufacturer = Build.MANUFACTURER
+    DebugMode.e(manufacturer)
+    return manufacturer.equals("Amazon", ignoreCase = true)
 }

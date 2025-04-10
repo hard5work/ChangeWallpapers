@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,7 @@ import com.xdroid.app.changewallpaper.ui.activity.MainActivity
 import com.xdroid.app.changewallpaper.ui.layouts.AdSection
 import com.xdroid.app.changewallpaper.ui.layouts.ShimmerAdPlaceHolder
 import com.xdroid.app.changewallpaper.ui.theme.backGroundColor
+import com.xdroid.app.changewallpaper.ui.theme.black
 import com.xdroid.app.changewallpaper.ui.theme.colorPrimary
 import com.xdroid.app.changewallpaper.ui.theme.shimmerColor3
 import com.xdroid.app.changewallpaper.ui.theme.white
@@ -613,6 +615,13 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
                 linearLayout.layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
                 linearLayout.setPadding(10)
 
+                val adText = TextView(ctx)
+                adText.setTextColor(white.toArgb())
+                adText.setPadding(10)
+                adText.setBackgroundColor(black.toArgb())
+                adText.text = "Ad"
+                adText.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+                linearLayout.addView(adText)
 
                 val mediaView = MediaView(ctx)
 //                mediaView.id = 2
@@ -638,6 +647,7 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
 //                bodyView.id = 3
                 linearLayout.addView(bodyView)
 
+
                 val callToActionView = Button(ctx)
                 callToActionView.setBackgroundColor(colorPrimary.toArgb())
                 callToActionView.setPadding(10)
@@ -650,10 +660,10 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
 ////                priceView.id = 6
 //                linearLayout.addView(priceView)
 //
-//                val starRatingView = RatingBar(ctx, null, android.R.attr.ratingBarStyleSmall)
-////                starRatingView.id = 7
-//                linearLayout.addView(starRatingView)
-//
+                val starRatingView = RatingBar(ctx, null, android.R.attr.ratingBarStyleSmall)
+//                starRatingView.id = 7
+                linearLayout.addView(starRatingView)
+
 //                val storeView = TextView(ctx)
 ////                storeView.id = 8
 //                linearLayout.addView(storeView)
@@ -670,7 +680,7 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
                 adView.iconView = iconView
                 adView.callToActionView = callToActionView
 //                adView.priceView = priceView
-//                adView.starRatingView = starRatingView
+                adView.starRatingView = starRatingView
 //                adView.storeView = storeView
 //                adView.advertiserView = advertiserView
 
@@ -695,7 +705,6 @@ private fun populateNativeAdView(nativeAd: NativeAd, adView: NativeAdView) {
         adView.bodyView?.visibility = android.view.View.VISIBLE
         (adView.bodyView as TextView).text = nativeAd.body
     }
-
     if (nativeAd.callToAction == null) {
         adView.callToActionView?.visibility = android.view.View.INVISIBLE
     } else {
@@ -729,12 +738,12 @@ private fun populateNativeAdView(nativeAd: NativeAd, adView: NativeAdView) {
 //        (adView.storeView as TextView).text = nativeAd.store
 //    }
 //
-//    if (nativeAd.starRating == null) {
-//        adView.starRatingView?.visibility = android.view.View.INVISIBLE
-//    } else {
-//        adView.starRatingView?.visibility = android.view.View.VISIBLE
-//        (adView.starRatingView as RatingBar).rating = nativeAd.starRating!!.toFloat()
-//    }
+    if (nativeAd.starRating == null) {
+        adView.starRatingView?.visibility = android.view.View.INVISIBLE
+    } else {
+        adView.starRatingView?.visibility = android.view.View.VISIBLE
+        (adView.starRatingView as RatingBar).rating = nativeAd.starRating!!.toFloat()
+    }
 //
 //    if (nativeAd.advertiser == null) {
 //        adView.advertiserView?.visibility = android.view.View.INVISIBLE

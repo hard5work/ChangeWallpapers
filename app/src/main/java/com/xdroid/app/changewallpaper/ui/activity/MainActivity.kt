@@ -66,7 +66,9 @@ import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
 import com.xdroid.app.changewallpaper.ui.adscreen.mInterstitialAd
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstialAds
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
+import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialogWithAds
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
+import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialogWithAds
 import com.xdroid.app.changewallpaper.ui.layouts.MyApp
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
 import com.xdroid.app.changewallpaper.ui.theme.ChangeWallpapersTheme
@@ -90,6 +92,7 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
 
     lateinit var timer: CountDownTimer
+    var showAlert: Boolean = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,7 +106,7 @@ class MainActivity : ComponentActivity() {
         if (mInterstitialAd == null)
             loadInterstitial(this)
         RewardedAdManager.loadAd(this)
-        timer = object : CountDownTimer(5 * 60 * 1000, 1000) { // 5 minutes
+        timer = object : CountDownTimer(10 * 60 * 1000, 1000) { // 5 minutes
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = (millisUntilFinished / 1000) / 60
                 val seconds = (millisUntilFinished / 1000) % 60
@@ -112,6 +115,8 @@ class MainActivity : ComponentActivity() {
             }
 
             override fun onFinish() {
+                showAlert = true
+
                 val dialog = AlertDialog.Builder(this@MainActivity)
                 dialog.setTitle("Scrolling for too long")
                 dialog.setMessage("Take a small break to continue.")
@@ -153,11 +158,10 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(black)
                 ) {
-
-
                     Column(
 
                     ) {
+
                         AppUpdate()
 //                        MainScreen()
 

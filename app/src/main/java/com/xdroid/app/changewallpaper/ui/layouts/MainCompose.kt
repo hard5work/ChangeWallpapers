@@ -36,7 +36,7 @@ fun MyApp() {
             WallpaperChangerApp(navController, image)
         }
         composable(ScreenName.Settings) {
-            SettingScreen(navController,viewModel)
+            SettingScreen(navController)
         }
 
     }

@@ -61,6 +61,7 @@ import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.components.getScreenHeight
 import com.xdroid.app.changewallpaper.ui.components.getScreenWidth
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
+import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialogWithAds
 import com.xdroid.app.changewallpaper.ui.theme.background
 import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
@@ -244,7 +245,11 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
     }
 
     if (wallpaperChanged) {
-        InfoAlertDialog(message = "Wallpaper changed successfully") {
+        InfoAlertDialogWithAds(
+            message = "Wallpaper changed successfully",
+            dismissOnBackPress = true,
+            dismissOnClickedOutside = true
+        ) {
             isLoading.value = false
             wallpaperChanged = false
             removeInterstitial()
@@ -287,7 +292,7 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                                     wallpaperChanged = false
                                 }
                             },
-                            wallpaperManager,wallpaperLauncher
+                            wallpaperManager, wallpaperLauncher
                         )
                     }
                 }
@@ -304,7 +309,8 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                         wallpaperChanged = false
                     }
                 },
-                wallpaperManager,wallpaperLauncher)
+                wallpaperManager, wallpaperLauncher
+            )
 
         }
 

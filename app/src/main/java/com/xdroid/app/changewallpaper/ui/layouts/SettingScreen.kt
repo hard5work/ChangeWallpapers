@@ -2,6 +2,7 @@ package com.xdroid.app.changewallpaper.ui.layouts
 
 import android.app.Activity
 import android.app.WallpaperManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -75,190 +77,85 @@ import org.koin.compose.koinInject
 import java.util.Random
 import kotlin.text.Typography.quote
 
-
 @Composable
 fun SettingScreen(
-    navController: NavController,
-    viewModel: SharedViewModel
+    navController: NavController
 ) {
-
     val context = LocalContext.current
-    val activity = context as? Activity
-
-    val reviewManager = remember {
-        ReviewManagerFactory.create(context)
-    }
-
-//    val reviewManager = remember {
-//        FakeReviewManager(context)
-//    }
-
-
-//    val reviewInfo = rememberReviewTask(reviewManager)
-
-    val wallpaperManager = WallpaperManager.getInstance(LocalContext.current)
-//    val reviewInfo = rememberFakeReviewTask(reviewManager)
-
-    var isLoading by rememberSaveable { mutableStateOf(false) }
-    var buttonClicked by rememberSaveable { mutableStateOf(false) }
-    val networkHelper: NetworkHelper = koinInject()
-    var isDataLoaded by rememberSaveable { mutableStateOf(false) }
-    var showRewards by rememberSaveable { mutableStateOf(false) }
-    val myImage = viewModel.getUserData() ?: ListItems(items = emptyList())
-    var finalImage by rememberSaveable { mutableStateOf("") }
-    val myImages by rememberSaveable { mutableStateOf(ArrayList<MyItems>()) }
-    val wallpaperLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(context, "Wallpaper Set Successfully!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "Wallpaper Setting Cancelled!", Toast.LENGTH_SHORT).show()
-        }
-    }
-    LaunchedEffect(Unit) {
-        if (networkHelper.isNetworkConnected()) {
-            RewardedAdManager.loadAd(context)
-        }
-        myImages.addAll(myImage.items)
-        DebugMode.e("Items in settings ${myImages.size}")
-
-    }
-
 
     Column(
-        modifier = Modifier.fillMaxSize().background(black)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(black)
+            .padding(horizontal = 16.dp)
     ) {
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 5.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = {
-                    navController.navigateUp()
-                }) {
-                    Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "BackIcon")
-                }
-                Text(context.getString(R.string.app_name), fontSize = 18.sp, color = white)
-
-            }
-        }
-
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 5.dp)
-        ) {
-
-            LazyColumn {
-                item {
-                    Spacer(Modifier.height(20.dp))
-                    ProfileMenu(GooglePlay, "Google Apps") {
-                        openLinkInBrowser(
-                            context,
-                            "https://play.google.com/store/apps/developer?id=Joyful+Juncture"
-                        )
-                    }
-                    ProfileMenu(Amazon, "Amazon Apps") {
-                        openLinkInBrowser(
-                            context,
-                            "https://www.amazon.com/s?i=mobile-apps&rh=p_4%3AJoyful%2BJuncture&search-type=ss"
-                        )
-                    }
-                    ProfileMenu(Icons.Default.Reviews, "Review Our App Playstore") {
-                        openLinkInBrowser(
-                            context,
-                            "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID.toString()}"
-                        )
-                    }
-//                    ProfileMenu(Icons.Default.Reviews, "Review Our App Amazon") {
-//                        openLinkInBrowser(
-//                            context,
-//                            "https://www.amazon.com/gp/product/B0DT6RYXQS"
-//                        )
-//                    }
-//                    ProfileMenu(Icons.Default.AdsClick, "Watch Ads for surprise") {
-//                        buttonClicked = true
-//
-//                    }
-                    ProfileMenu(Icons.Default.Info, "Version [${BuildConfig.VERSION_NAME}] (${BuildConfig.VERSION_CODE})")
-                }
-            }
-
-
-        }
-
+        Header(navController)
+        Spacer(Modifier.height(12.dp))
+        SettingsMenu(context)
     }
-
-    if (buttonClicked) {
-        isLoading = true
-        if (networkHelper.isNetworkConnected()) {
-
-            activity?.let {
-                RewardedAdManager.showAd(it) { _ ->
-                    buttonClicked = false
-                    isLoading = false
-                    val ite = myImages[Random().nextInt(myImages.size)]
-                    val image = "${ite.collectionID}/${ite.id}/${ite.image}"
-                    finalImage = imageUrl + image
-                    DebugMode.e("Items in Settings $finalImage")
-                    showRewards = true
-                }
-            }
-//            if (mInterstitialAd == null) {
-//                loadInterstitial(context) { _ ->
-//                    showInterstitial(context) {
-//                        buttonClicked = false
-//                        isLoading = false
-//                    }
-//                }
-//
-//            } else {
-//                showInterstitial(context) {
-//                    buttonClicked = false
-//                    isLoading = false
-//
-//                }
-//            }
-        }
-    }
-
-    if (showRewards) {
-        CustomAlertDialogImage(
-            image = finalImage,
-            confirmButtonText = "Change",
-            dismissButtonText = "Cancel",
-            onConfirmButtonClick = {
-                showRewards = false
-                changeWallpaper2(
-                    context,
-                    imageUrl = finalImage,
-                    callback = { success ->
-                        if (success)
-                            Toast.makeText(context, "Wallpaper Changed", Toast.LENGTH_SHORT).show()
-                    },
-                    wallpaperManager = wallpaperManager,
-                    launcher = wallpaperLauncher
-                )
-            }
-        ) {
-            showRewards = false
-        }
-    }
-
-
 }
+
+@Composable
+private fun Header(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = { navController.navigateUp() }) {
+            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "BackIcon")
+        }
+        Text(
+            text = stringResource(R.string.app_name),
+            fontSize = 18.sp,
+            color = white,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun SettingsMenu(context: Context) {
+    val settingsItems = listOf(
+        SettingItem(
+            icon = GooglePlay,
+            title = "Google Apps",
+            url = "https://play.google.com/store/apps/developer?id=Joyful+Juncture"
+        ),
+        SettingItem(
+            icon = Amazon,
+            title = "Amazon Apps",
+            url = "https://www.amazon.com/s?i=mobile-apps&rh=p_4%3AJoyful%2BJuncture&search-type=ss"
+        ),
+        SettingItem(
+            icon = Icons.Default.Reviews,
+            title = "Review Our App Playstore",
+            url = "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
+        ),
+        SettingItem(
+            icon = Icons.Default.Info,
+            title = "Version [${BuildConfig.VERSION_NAME}] (${BuildConfig.VERSION_CODE})",
+            url = null
+        )
+    )
+
+    LazyColumn {
+        items(settingsItems.size) { index ->
+            val item = settingsItems[index]
+            ProfileMenu(icon = item.icon, name = item.title) {
+                item.url?.let { openLinkInBrowser(context, it) }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+data class SettingItem(
+    val icon: ImageVector,
+    val title: String,
+    val url: String?
+)
 
 @Composable
 fun ProfileMenu(icon: ImageVector, name: String, action: () -> Unit = {}) {

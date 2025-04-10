@@ -97,9 +97,9 @@ android {
         }
         create("ronaldo") {
             applicationIdSuffix = ".ronaldo"
-            versionCode = 8
+            versionCode = 12
             dimension = "environment"
-            versionName = "1.0.8"
+            versionName = "1.0.12"
         }
         create("messi") {
             applicationIdSuffix = ".messi"
@@ -218,4 +218,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
+//    implementation libs.vungle.ads
+//    implementation(libs.unity.ads)
+//    implementation(libs.unity)
 }
