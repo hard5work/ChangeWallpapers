@@ -1,6 +1,7 @@
 package com.xdroid.app.changewallpaper.di.module
 
 import android.content.Context
+import androidx.room.Room
 import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
 import com.xdroid.app.changewallpaper.App
@@ -8,6 +9,7 @@ import com.xdroid.app.changewallpaper.BuildConfig
 import com.xdroid.app.changewallpaper.data.neworks.ApiHelper
 import com.xdroid.app.changewallpaper.data.neworks.ApiHelperImpl
 import com.xdroid.app.changewallpaper.data.neworks.ApiService
+import com.xdroid.app.changewallpaper.data.room.AppDatabase
 import com.xdroid.app.changewallpaper.utils.constants.NetworkError
 import com.xdroid.app.changewallpaper.utils.constants.NetworkError.DATA_EXCEPTION
 import com.xdroid.app.changewallpaper.utils.constants.NetworkError.IO_EXCEPTION
@@ -39,6 +41,13 @@ val appModule = module {
     single<ApiHelper> {
         return@single ApiHelperImpl(get())
     }
+
+    single {
+        Room.databaseBuilder(get(), AppDatabase::class.java, "note_db")
+            .fallbackToDestructiveMigration(false)
+            .build()
+    }
+    single { get<AppDatabase>().favDao() }
 }
 
 private fun provideNetworkHelper(context: Context) = NetworkHelper(context)
@@ -90,6 +99,7 @@ fun getErrorMessage(e: Throwable): String? {
             jObj.toString()
 
         }
+
         is HttpException -> {
             val responseBody = e.response()!!.errorBody()
             val code = e.response()!!.code().toString()
@@ -99,6 +109,7 @@ fun getErrorMessage(e: Throwable): String? {
                  getErrorMessages(responseBody!!)
              }*/
         }
+
         is SocketTimeoutException -> {
             val jObj = JsonObject()
             jObj.addProperty("title", "Socket Timeout")
@@ -107,6 +118,7 @@ fun getErrorMessage(e: Throwable): String? {
             jObj.toString()
 //            TIME_OUT
         }
+
         is IOException -> {
             val jObj = JsonObject()
             jObj.addProperty("title", "IO Error")
@@ -115,6 +127,7 @@ fun getErrorMessage(e: Throwable): String? {
             jObj.toString()
 //            IO_EXCEPTION
         }
+
         else -> {
             val jObj = JsonObject()
             jObj.addProperty("title", "Server Error")
@@ -137,6 +150,10 @@ private fun getErrorMessage(responseBody: ResponseBody): String? {
         jObj.toString()
     } catch (e: Exception) {
         e.message
+        val jObj = JsonObject()
+        jObj.addProperty("status", "")
+        jObj.addProperty("message", e.message.toString())
+        jObj.toString()
     }
 }
 

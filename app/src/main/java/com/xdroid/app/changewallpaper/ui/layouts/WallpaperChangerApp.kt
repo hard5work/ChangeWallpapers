@@ -17,10 +17,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PublishedWithChanges
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +42,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -52,6 +58,7 @@ import com.chartboost.sdk.impl.wa
 import com.google.android.gms.ads.nativead.NativeAd
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.data.UrlName
+import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
@@ -63,14 +70,17 @@ import com.xdroid.app.changewallpaper.ui.components.getScreenWidth
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialogWithAds
 import com.xdroid.app.changewallpaper.ui.theme.background
+import com.xdroid.app.changewallpaper.ui.theme.black
 import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
+import com.xdroid.app.changewallpaper.utils.vm.FavoriteViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.io.File
 import java.io.FileOutputStream
@@ -85,21 +95,45 @@ import kotlin.coroutines.suspendCoroutine
 fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
 
     val networkHelper: NetworkHelper = koinInject()
+    val favoriteViewModel: FavoriteViewModel = koinViewModel()
+    val isFavorite by favoriteViewModel.singleItem.collectAsState()
+    val notes by favoriteViewModel.notes.collectAsState()
+
     var wallpaperChanged by rememberSaveable { mutableStateOf(false) }
     val wallpaperManager = WallpaperManager.getInstance(LocalContext.current)
     var buttonClicked by rememberSaveable { mutableStateOf(false) }
     val isLoading = rememberSaveable { mutableStateOf(false) }
     var isDataLoaded by rememberSaveable { mutableStateOf(false) }
+    var isFav by rememberSaveable { mutableStateOf(false) }
+
+    fun checkFav() {
+        favoriteViewModel.loadSingleItem(imageUrl)
+        isFav = isFavorite != null
+
+        DebugMode.e("IS Fav = $isFav ${notes.size}")
+
+    }
+
     val context = LocalContext.current
     var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
     var counter by remember {
         mutableIntStateOf(App.preferenceHelper.getValue(PrefConstant.COUNTER, 0) as Int)
     }
+
+    var favour by remember {
+        mutableIntStateOf(App.preferenceHelper.getValue(PrefConstant.Favorite, 0) as Int)
+    }
+
     // Load the ad when the screen appears
     LaunchedEffect(Unit) {
         NativeAdManager.loadNativeAd(context) { ad ->
             nativeAd = ad
         }
+
+    }
+
+    LaunchedEffect(isFavorite) {
+        checkFav()
     }
     val wallpaperLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -203,22 +237,92 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
 //            AdmobNativeAd(nativeAd)
 //        }
             Spacer(modifier = Modifier.height(10.dp))
-            if (!isLoading.value) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            )
+            {
+                if (!isLoading.value) {
+                    Button(
+                        onClick = {
+                            buttonClicked = true
+                            isLoading.value = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        elevation = ButtonDefaults.elevatedButtonElevation(5.dp),
+                        modifier = Modifier
+                            .height(50.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Filled.Wallpaper,
+                                contentDescription = "Change Icons",
+                                tint = black,
+                            )
+                        }
+                    }
+                } else {
+                    CircularProgressIndicator(color = Color.White)
+                }
+                Spacer(Modifier.width(25.dp))
+
                 Button(
                     onClick = {
+                        if (favour == 5) {
+                            if (mInterstitialAd == null) {
+                                loadInterstitial(context) { _ ->
+                                    showInterstitial(context) {
+                                        if (isFav) {
+                                            if (isFavorite != null)
+                                                favoriteViewModel.deleteNote(isFavorite!!)
+                                        } else {
+                                            favoriteViewModel.addNote(content = imageUrl)
+                                        }
+                                        isFav = !isFav
+                                    }
+                                }
 
-                        buttonClicked = true
-                        isLoading.value = true
-                        /*  changeWallpaper(
-                      imageUrl, { success ->
-                          wallpaperChanged.value = success
+                            } else {
+                                showInterstitial(context) {
+                                    if (isFav) {
+                                        if (isFavorite != null)
+                                            favoriteViewModel.deleteNote(isFavorite!!)
+                                    } else {
+                                        favoriteViewModel.addNote(content = imageUrl)
+                                    }
+                                    isFav = !isFav
+                                }
+                            }
+                            favour = 0
 
-                      },
-                      wallpaperManager
-                  )*/
+                        } else {
+                            if (isFav) {
+                                if (isFavorite != null)
+                                    favoriteViewModel.deleteNote(isFavorite!!)
+                            } else {
+                                favoriteViewModel.addNote(content = imageUrl)
+                            }
+                            isFav = !isFav
+                        }
+
+                        favour++
+                        App.preferenceHelper.setValue(PrefConstant.Favorite, favour)
+
+//                    checkFav()
 
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    elevation = ButtonDefaults.elevatedButtonElevation(5.dp),
+                    modifier = Modifier
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(10.dp))
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -226,17 +330,14 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                     ) {
 
                         Icon(
-                            imageVector = Icons.Filled.PublishedWithChanges,
-                            contentDescription = "Change Icons",
-                            tint = background
+                            imageVector = if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = "Change",
+                            tint = black
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(text = "Change Wallpaper", color = background, fontSize = 16.sp)
                     }
                 }
-            } else {
-                CircularProgressIndicator(color = Color.White)
             }
+
 
 
             Spacer(modifier = Modifier.height(16.dp))

@@ -24,8 +24,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.AdsClick
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Reviews
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -91,6 +93,24 @@ fun SettingScreen(
     ) {
         Header(navController)
         Spacer(Modifier.height(12.dp))
+        ProfileMenu(icon = Icons.Default.Favorite, name = "Favorites") {
+            navController.navigate(ScreenName.Favorites)
+        }
+        Spacer(Modifier.height(12.dp))
+        ProfileMenu(icon = Icons.Default.Share, name = "Share App") {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Check out this awesome app: https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
+                )
+            }
+            context.startActivity(
+                Intent.createChooser(shareIntent, "Share via")
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
         SettingsMenu(context)
     }
 }
@@ -144,7 +164,9 @@ private fun SettingsMenu(context: Context) {
         items(settingsItems.size) { index ->
             val item = settingsItems[index]
             ProfileMenu(icon = item.icon, name = item.title) {
-                item.url?.let { openLinkInBrowser(context, it) }
+                item.url?.let {
+                    openLinkInBrowser(context, it)
+                }
             }
             Spacer(Modifier.height(12.dp))
         }

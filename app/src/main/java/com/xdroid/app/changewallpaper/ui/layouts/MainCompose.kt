@@ -38,6 +38,9 @@ fun MyApp() {
         composable(ScreenName.Settings) {
             SettingScreen(navController)
         }
+        composable(ScreenName.Favorites) {
+            FavoriteScreen(navController)
+        }
 
     }
 

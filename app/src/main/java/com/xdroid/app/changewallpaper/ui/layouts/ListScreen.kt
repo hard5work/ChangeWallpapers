@@ -535,7 +535,11 @@ fun ActionsItemList(
             if (newitems[index] is MyItems) {
                 val ite = newitems[index] as MyItems
                 val images =
-                    "${ite.collectionID}/${ite.id}/${ite.image}"
+                    if (ite.collectionID.isNullOrEmpty() && ite.id.isNullOrEmpty()) ite.image.isNull()
+                        .split(
+                            UrlName.imageUrl
+                        )[1] else
+                        "${ite.collectionID}/${ite.id}/${ite.image}"
                 val rememberImages = remember {
                     images
                 }

@@ -662,6 +662,7 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
 //
                 val starRatingView = RatingBar(ctx, null, android.R.attr.ratingBarStyleSmall)
 //                starRatingView.id = 7
+                starRatingView.numStars = 5
                 linearLayout.addView(starRatingView)
 
 //                val storeView = TextView(ctx)

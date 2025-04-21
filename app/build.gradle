@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.crash.analytics)
     alias(libs.plugins.android.compose)
+    alias(libs.plugins.android.ksp)
 }
 
 android {
@@ -65,24 +66,24 @@ android {
         }
         create("anime") {
             applicationIdSuffix = ".anime"
-            versionCode = 18 //13
+            versionCode = 21 //13
             dimension = "environment"
-            versionName = "1.0.18" //13
+            versionName = "1.0.21" //13
 
         }
 
         create("artistic") {
             applicationIdSuffix = ".artistic"
-            versionCode = 7
+            versionCode = 8
             dimension = "environment"
-            versionName = "1.0.7"
+            versionName = "1.0.8"
 
         }
         create("all") {
             applicationIdSuffix = ".all"
-            versionCode = 7
+            versionCode = 8
             dimension = "environment"
-            versionName = "1.0.7"
+            versionName = "1.0.8"
 
         }
 
@@ -97,15 +98,15 @@ android {
         }
         create("ronaldo") {
             applicationIdSuffix = ".ronaldo"
-            versionCode = 12
+            versionCode = 13
             dimension = "environment"
-            versionName = "1.0.12"
+            versionName = "1.0.13"
         }
         create("messi") {
             applicationIdSuffix = ".messi"
-            versionCode = 8
+            versionCode = 9
             dimension = "environment"
-            versionName = "1.0.8"
+            versionName = "1.0.9"
         }
         create("anim") {
             applicationIdSuffix = ".anim"
@@ -117,9 +118,9 @@ android {
 
         create("kdrama") {
             applicationIdSuffix = ".kdrama"
-            versionCode = 5
+            versionCode = 7
             dimension = "environment"
-            versionName = "1.0.5"
+            versionName = "1.0.7"
 
         }
 
@@ -221,4 +222,8 @@ dependencies {
 //    implementation libs.vungle.ads
 //    implementation(libs.unity.ads)
 //    implementation(libs.unity)
+    // Room
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    ksp libs.androidx.room.compiler
 }

@@ -20,6 +20,7 @@ object ScreenName {
     const val Profile = "Profile"
     const val Detail = "Detail"
     const val Settings = "Settings"
+    const val Favorites = "Favorites"
 
     //Services
     const val DataPack = "DataPack"
