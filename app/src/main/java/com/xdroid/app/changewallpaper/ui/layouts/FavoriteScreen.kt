@@ -274,7 +274,8 @@ fun createItemModel2(
                     collectionID = colID,
                     id = "",
                     image = data.url,
-                    created = createdAt
+                    created = createdAt,
+                    combineID = "$id/_${colID}_${data.url}"
                 )
             )
 

@@ -124,6 +124,10 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
         mutableIntStateOf(App.preferenceHelper.getValue(PrefConstant.Favorite, 0) as Int)
     }
 
+    var wallpaperCounter by remember {
+        mutableIntStateOf(App.preferenceHelper.getValue(PrefConstant.Wallpaper, 0) as Int)
+    }
+
     // Load the ad when the screen appears
     LaunchedEffect(Unit) {
         NativeAdManager.loadNativeAd(context) { ad ->
@@ -251,9 +255,10 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                             isLoading.value = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                        elevation = ButtonDefaults.elevatedButtonElevation(5.dp),
+                        elevation = ButtonDefaults.elevatedButtonElevation(3.dp),
                         modifier = Modifier
                             .height(50.dp)
+                            .padding(vertical = 5.dp)
                             .clip(RoundedCornerShape(10.dp))
                     ) {
                         Row(
@@ -319,9 +324,10 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
 
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                    elevation = ButtonDefaults.elevatedButtonElevation(5.dp),
+                    elevation = ButtonDefaults.elevatedButtonElevation(3.dp),
                     modifier = Modifier
                         .height(50.dp)
+                        .padding(vertical = 5.dp)
                         .clip(RoundedCornerShape(10.dp))
                 ) {
                     Row(
@@ -345,25 +351,48 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
         }
     }
 
+    var infoMessage by rememberSaveable { mutableStateOf("Wallpaper changed successfully") }
     if (wallpaperChanged) {
         InfoAlertDialogWithAds(
-            message = "Wallpaper changed successfully",
+            message = infoMessage,
             dismissOnBackPress = true,
             dismissOnClickedOutside = true
         ) {
             isLoading.value = false
             wallpaperChanged = false
             removeInterstitial()
+            infoMessage = "Wallpaper changed successfully"
 
         }
     }
 
     if (buttonClicked) {
-        if (networkHelper.isNetworkConnected()) {
-            DebugMode.e("Change the wallpaper?? -> >>>>")
-            LaunchedEffect(Unit) {
-                if (mInterstitialAd == null) {
-                    loadInterstitial(context) { _ ->
+        if (wallpaperCounter > 3) {
+            if (networkHelper.isNetworkConnected()) {
+                DebugMode.e("Change the wallpaper?? -> >>>>")
+                LaunchedEffect(Unit) {
+                    if (mInterstitialAd == null) {
+                        loadInterstitial(context) { _ ->
+                            showInterstitial(context) {
+                                buttonClicked = false
+                                changeWallpaper2(
+                                    context = context,
+                                    imageUrl, { success ->
+                                        wallpaperChanged = success
+                                        if (!success) {
+                                            isLoading.value = false
+                                            wallpaperChanged = false
+                                        }
+                                        wallpaperCounter = 0
+                                        App.preferenceHelper.setValue(PrefConstant.Wallpaper,wallpaperCounter)
+
+                                    },
+                                    wallpaperManager, wallpaperLauncher
+                                )
+                            }
+                        }
+
+                    } else {
                         showInterstitial(context) {
                             buttonClicked = false
                             changeWallpaper2(
@@ -374,44 +403,55 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
                                         isLoading.value = false
                                         wallpaperChanged = false
                                     }
+                                    wallpaperCounter = 0
+                                    App.preferenceHelper.setValue(PrefConstant.Wallpaper,wallpaperCounter)
 
                                 },
                                 wallpaperManager, wallpaperLauncher
                             )
                         }
                     }
-
-                } else {
-                    showInterstitial(context) {
-                        buttonClicked = false
-                        changeWallpaper2(
-                            context = context,
-                            imageUrl, { success ->
-                                wallpaperChanged = success
-                                if (!success) {
-                                    isLoading.value = false
-                                    wallpaperChanged = false
-                                }
-                            },
-                            wallpaperManager, wallpaperLauncher
-                        )
-                    }
                 }
-            }
 
-        } else {
+            } else {
+                buttonClicked = false
+                wallpaperChanged = true
+                infoMessage ="No Internet Connection"
+//                changeWallpaper2(
+//                    context = context,
+//                    imageUrl, { success ->
+//                        wallpaperChanged = success
+//                        if (!success) {
+//                            isLoading.value = false
+//                            wallpaperChanged = false
+//                        }
+//                    },
+//                    wallpaperManager, wallpaperLauncher
+//                )
+
+            }
+        }else{
             buttonClicked = false
-            changeWallpaper2(
-                context = context,
-                imageUrl, { success ->
-                    wallpaperChanged = success
-                    if (!success) {
-                        isLoading.value = false
-                        wallpaperChanged = false
-                    }
-                },
-                wallpaperManager, wallpaperLauncher
-            )
+            if (networkHelper.isNetworkConnected()) {
+                changeWallpaper2(
+                    context = context,
+                    imageUrl, { success ->
+                        wallpaperChanged = success
+                        if (!success) {
+                            isLoading.value = false
+                            wallpaperChanged = false
+                        }
+                    },
+                    wallpaperManager, wallpaperLauncher
+                )
+            }
+            else{
+                buttonClicked = false
+                wallpaperChanged = true
+                infoMessage ="No Internet Connection"
+            }
+            wallpaperCounter++
+            App.preferenceHelper.setValue(PrefConstant.Wallpaper,wallpaperCounter)
 
         }
 

@@ -89,10 +89,20 @@ fun BannerAdView() {
     AndroidView(
         modifier = Modifier
             .fillMaxWidth(),
-        factory = { context ->
-            AdView(context).apply {
-                setAdSize(AdSize.BANNER)
-                // Add your adUnitID, this is for testing.
+        factory = { ctx ->
+            AdView(ctx).apply {
+//                setAdSize(AdSize.BANNER)
+                val displayMetrics = ctx.resources.displayMetrics
+                val density = displayMetrics.density
+                val adWidthPixels = displayMetrics.widthPixels.toFloat()
+                val adWidth = (adWidthPixels / density).toInt()
+
+                // Adaptive banner size
+                val adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(ctx, adWidth)
+
+                setAdSize(adSize)
+                // Add your adUnitID, this
+                // is for testing.
                 adUnitId = adUnitIds
                 loadAd(AdRequest.Builder().build())
             }

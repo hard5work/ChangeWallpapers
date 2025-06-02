@@ -47,7 +47,9 @@ val appModule = module {
             .fallbackToDestructiveMigration(false)
             .build()
     }
+
     single { get<AppDatabase>().favDao() }
+    single { get<AppDatabase>().myItemsDao() }
 }
 
 private fun provideNetworkHelper(context: Context) = NetworkHelper(context)
@@ -142,11 +144,11 @@ fun getErrorMessage(e: Throwable): String? {
 private fun getErrorMessage(responseBody: ResponseBody): String? {
     return try {
         val jsonObject = JSONObject(responseBody.string())
-        jsonObject.getString("status")
-        jsonObject.getString("message")
+//        jsonObject.getString("status")
+//        jsonObject.getString("message")
         val jObj = JsonObject()
-        jObj.addProperty("status", jsonObject.getString("status"))
-        jObj.addProperty("message", jsonObject.getString("message"))
+        jObj.addProperty("status", jsonObject.optString("status",""))
+        jObj.addProperty("message", jsonObject.optString("message", jsonObject.toString()))
         jObj.toString()
     } catch (e: Exception) {
         e.message

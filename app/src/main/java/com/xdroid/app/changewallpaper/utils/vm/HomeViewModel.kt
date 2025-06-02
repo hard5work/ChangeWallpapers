@@ -49,6 +49,10 @@ class HomeViewModel(mainRepository: MainRepository, networkHelper: NetworkHelper
 
     }
 
+    fun resetDATA(){
+        imageRequest =  MutableStateFlow<Resource<JsonObject>>(Resource.idle())
+    }
+
     fun setList(list: List<MyItems>) {
         _myImages.value = list.shuffled(Random())
     }

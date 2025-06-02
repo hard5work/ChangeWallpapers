@@ -400,7 +400,16 @@ fun CustomAlertDialogWithAds(
     val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
     val adView = remember {
         AdView(context).apply {
-            setAdSize(AdSize.LARGE_BANNER)
+//            setAdSize(AdSize.LARGE_BANNER)
+            val displayMetrics = context.resources.displayMetrics
+            val density = displayMetrics.density
+            val adWidthPixels = displayMetrics.widthPixels.toFloat()
+            val adWidth = (adWidthPixels / density).toInt() - 100
+
+            // Adaptive banner size
+            val adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth)
+
+            setAdSize(adSize)
             adUnitId = adUnitIds
         }
     }
@@ -538,7 +547,16 @@ fun InfoAlertDialogWithAds(
     val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
     val adView = remember {
         AdView(context).apply {
-            setAdSize(AdSize.LARGE_BANNER)
+            val displayMetrics = context.resources.displayMetrics
+            val density = displayMetrics.density
+            val adWidthPixels = displayMetrics.widthPixels.toFloat()
+            val adWidth = (adWidthPixels / density).toInt() -100
+
+            // Adaptive banner size
+            val adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth)
+
+            setAdSize(adSize)
+//            setAdSize(AdSize.LARGE_BANNER)
             adUnitId = adUnitIds
         }
     }

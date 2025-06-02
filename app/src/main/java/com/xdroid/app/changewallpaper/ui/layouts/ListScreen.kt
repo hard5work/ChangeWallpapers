@@ -31,6 +31,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +63,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,6 +99,7 @@ import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
 import com.xdroid.app.changewallpaper.ui.theme.black
 import com.xdroid.app.changewallpaper.ui.theme.latoRegular12
+import com.xdroid.app.changewallpaper.ui.theme.latoRegular16
 import com.xdroid.app.changewallpaper.ui.theme.white
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.enums.Status
@@ -137,6 +141,8 @@ fun HomeScreen(
     var showAlert by rememberSaveable { mutableStateOf(false) }
     var alertMessage by rememberSaveable { mutableStateOf("") }
 //    val myImages = remember { mutableStateListOf<MyItems>() }
+
+    val dbImages by homeViewModel.dbImages.collectAsState()
     val myImages by homeViewModel.myImages.collectAsState(initial = emptyList())
 
     val dataImages = remember { mutableStateListOf<MyItems>() }
@@ -161,17 +167,34 @@ fun HomeScreen(
 //    if (itemModel.items != null) {
 //        createItemModel(itemModel, dataImages, myImages)
 //    }
-    when (states.status) {
-        Status.ERROR -> {
-            LaunchedEffect(Unit) {
+
+//    LaunchedEffect(states.status) {
+//        if (states.status == Status.ERROR) {
+//            homeViewModel.setList(dbImages)
+//            showView = true
+//            alertMessage = states.message ?: "Something went wrong"
+//            showAlert = false
+//        }
+//    }
+
+    LaunchedEffect(dbImages) {
+        DebugMode.e("DEBUG", "Database updated → size: ${dbImages.size}")
+        if (states.status == Status.ERROR) {
+            homeViewModel.setList(dbImages)
+            showView = true
+//            showAlert = false
+
+        }
+    }
+    LaunchedEffect(states.status) {
+        when (states.status) {
+            Status.ERROR -> {
                 showView = false
                 alertMessage = states.message ?: "Something went wrong"
                 showAlert = true
             }
-        }
 
-        Status.SUCCESS -> {
-            LaunchedEffect(Unit) {
+            Status.SUCCESS -> {
                 if (!isDataLoaded.value) {
                     val response = DynamicResponse.myObject<ItemModel>(states.data)
                     itemModel = response
@@ -179,27 +202,20 @@ fun HomeScreen(
                     createItemModel(itemModel, dataImages, homeViewModel)
                 }
 
-
                 showView = true
                 showAlert = false
             }
-        }
 
-        Status.IDLE -> {
-//            DebugMode.e("data Idle state")
+            Status.LOADING -> {
+                showView = false
+            }
 
-
-        }
-
-        Status.LOADING -> {
-            showView = false
-
-//            DebugMode.e("data loading state")
-
-
+            Status.IDLE -> {
+                // No action
+                DebugMode.e("DATABASE SIZE ${dbImages.size}")
+            }
         }
     }
-
     val networkHelper: NetworkHelper = koinInject()
 
     BackHandler {
@@ -250,6 +266,9 @@ fun HomeScreen(
                             }
                         }
 //            }
+                    }else{
+                        showAlert = true
+                        alertMessage = "No internet connection"
                     }
                 }, containerColor = white, modifier = Modifier.clip(CircleShape)) {
                     Icon(
@@ -286,16 +305,42 @@ fun HomeScreen(
                         //                    CircularProgressIndicator(color = Color.White)
 
                         if (showView) {
+                            homeViewModel.resetDATA()
                             //                DebugMode.e("Show view $showView")
-                            if (myImages.size > 0)
+                            if (myImages.isNotEmpty())
                                 ActionsItemList(
                                     items = myImages,
                                     navController = navController,
                                     adBanner = adBanner
                                 )
                             else {
-                                Text("No Data", color = white, style = latoRegular12)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 40.dp),
+
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Card(
+                                        colors = CardDefaults.cardColors(white),
+                                        elevation = CardDefaults.cardElevation(5.dp)
+                                    ) {
+                                        Text(
+                                            alertMessage,
+                                            color = black,
+                                            style = latoRegular16,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(
+                                                vertical = 10.dp,
+                                                horizontal = 16.dp
+                                            )
+                                        )
+                                    }
+                                }
+
                             }
+
 
                         }
                     }
@@ -395,7 +440,8 @@ fun createItemModel(
                         collectionID = colID,
                         id = id,
                         image = img,
-                        created = createdAt
+                        created = createdAt,
+                        combineID = "$id/_$colID/_${data.name}/_$img"
                     )
                 )
             }
@@ -405,6 +451,7 @@ fun createItemModel(
         }
 
     viewModel.setList(items)
+    viewModel.addImages(items)
 }
 
 @Composable
@@ -561,7 +608,7 @@ fun itemsWithAds(items: List<MyItems>?): List<Any> {
         mixedList.add(item)
         // Add an ad placeholder every `interval` items
 //        DebugMode.e("calculated Value ${(index + 1) % 15}")
-        if ((index + 1) % 15 == 0) {
+        if ((index + 1) % 9 == 0) {
             mixedList.add("AdItem")
         }
 

@@ -1,5 +1,8 @@
 package com.xdroid.app.changewallpaper.cmodel
 
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -28,16 +31,17 @@ data class Item(
     val updated: String? = null
 ) : java.io.Serializable
 
-
+@Entity(tableName = "my_items")
 data class MyItems(
     @SerializedName("collectionId")
     val collectionID: String? = null,
-
     val id: String? = null,
     val image: String? = null,
     val created: String? = null,
+    @PrimaryKey
+    val combineID: String
 
-    ) : Serializable
+) : Serializable
 
 data class ListItems(
     val items: List<MyItems>

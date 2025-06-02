@@ -3,9 +3,9 @@ package com.xdroid.app.changewallpaper.data
 import com.xdroid.app.changewallpaper.BuildConfig
 
 object UrlName {
-    val allImageList = "pictures/records?filter=(category=%27${BuildConfig.FLAVOR}%27)"
-    val allImages = "pictures/records?sort=-created"
-    val animeImages = "pictures/records?filter=(category=%27anime%27)"
+    val allImageList = "pictures/records?filter=(category=%27${BuildConfig.FLAVOR}%27)&page=1&perPage=100&sort=-created"
+    val allImages = "pictures/records?page=1&perPage=100&sort=-created"
+    val animeImages = "pictures/records?filter=(category=%27anime%27)&page=1&perPage=100&sort=-created"
     val imageUrl = "https://anish.pockethost.io/api/files/"
     val adUrl = "ad/records?filter=(type=%27centerBanner%27)"
 

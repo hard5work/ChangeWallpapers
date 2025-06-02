@@ -9,8 +9,10 @@ import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.cmodel.AdModel
 import com.xdroid.app.changewallpaper.cmodel.DefaultRequestModel
 import com.xdroid.app.changewallpaper.cmodel.ErrorModel
+import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.UrlName
 import com.xdroid.app.changewallpaper.data.repository.MainRepository
+import com.xdroid.app.changewallpaper.data.room.Favorites
 import com.xdroid.app.changewallpaper.utils.constants.NetworkError
 import com.xdroid.app.changewallpaper.utils.enums.Resource
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
@@ -19,7 +21,9 @@ import com.xdroid.app.changewallpaper.utils.helpers.NetworkHelper
 import com.xdroid.app.changewallpaper.utils.helpers.PreferenceHelper
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel(
@@ -176,5 +180,18 @@ abstract class BaseViewModel(
             }
         }
     }
+
+    val dbImages = mainRepository.allImages.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList()
+    )
+
+    fun addImages(content: List<MyItems>) {
+        viewModelScope.launch {
+            mainRepository.insertImages(content)
+        }
+    }
+
 
 }

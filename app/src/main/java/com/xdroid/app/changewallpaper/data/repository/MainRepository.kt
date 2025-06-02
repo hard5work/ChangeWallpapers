@@ -9,7 +9,11 @@ import com.google.gson.reflect.TypeToken
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.cmodel.DefaultRequestModel
 import com.xdroid.app.changewallpaper.cmodel.ErrorModel
+import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.neworks.ApiHelper
+import com.xdroid.app.changewallpaper.data.room.FavoriteDao
+import com.xdroid.app.changewallpaper.data.room.Favorites
+import com.xdroid.app.changewallpaper.data.room.MyItemsDao
 import com.xdroid.app.changewallpaper.di.module.getErrorMessage
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.enums.Resource
@@ -19,9 +23,12 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class MainRepository(private val apiHelper: ApiHelper) {
+class MainRepository(private val apiHelper: ApiHelper, private val dao: MyItemsDao) {
 
     private val preferenceHelper = PreferenceHelper(App.baseApplication)
+    val allImages = dao.getAllItems()
+
+    suspend fun insertImages(images: List<MyItems>) = dao.insertItems(images)
 
     private fun jsonParsers(data: String): ErrorModel {
         return try {

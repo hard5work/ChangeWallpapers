@@ -12,6 +12,7 @@ object PrefConstant {
     const val SUBSCRIPTION_ID = "subscriptionId"
     const val COUNTER = "counter"
     const val Favorite = "Favorite"
+    const val Wallpaper = "Wallpaper"
     const val OPENAPPAD = "OpenApp"
     const val AUTO_LOGIN = "autoLogin"
 }
