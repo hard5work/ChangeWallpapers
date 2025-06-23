@@ -78,6 +78,7 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.nativead.NativeAd
+import com.skydoves.landscapist.ImageOptions
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.cmodel.AdModel
@@ -657,21 +658,43 @@ fun ActionItems(
 //            // Show the circular loading indicator while loading
 //            SingleShimmer()
 //        }
-        GlideImage(
-            model = imageUrl,
-            contentDescription = item,
-            loading = placeholder(R.drawable.rectange),
-            transition = CrossFade,
+//        GlideImage(
+//            model = imageUrl,
+//            contentDescription = item,
+//            loading = placeholder(R.drawable.rectange),
+//            transition = CrossFade,
+//            modifier = Modifier
+//                .height(250.dp)
+//                .width(450.dp)
+////                .fillMaxWidth()
+////                    .graphicsLayer { alpha = if (isLoading) 0f else 1f }
+//                .clip(
+//                    RoundedCornerShape(8.dp)
+//                ),
+//            contentScale = ContentScale.Crop
+//
+//        )
+        com.skydoves.landscapist.glide.GlideImage(
+            imageModel = { imageUrl },
+            loading = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    SingleShimmer()
+
+                }
+            },
+            failure = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
+                    Text("Image failed to load.")
+
+                }
+            },
+
             modifier = Modifier
                 .height(250.dp)
                 .width(450.dp)
-//                .fillMaxWidth()
-//                    .graphicsLayer { alpha = if (isLoading) 0f else 1f }
-                .clip(
-                    RoundedCornerShape(8.dp)
-                ),
-            contentScale = ContentScale.Crop
-
+                .clip(RoundedCornerShape(8.dp)),
+            imageOptions = ImageOptions(contentScale = ContentScale.Crop)
         )
 
 

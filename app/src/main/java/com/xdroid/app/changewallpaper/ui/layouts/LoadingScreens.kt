@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -118,6 +119,24 @@ fun ShimmerPlaceholder(
         ShimmerEffect(modifier = Modifier
             .height(220.dp)
             .fillMaxWidth()
+        )
+
+    }
+}
+
+
+@Composable
+fun FullScreenShimmer(
+    modifier: Modifier = Modifier
+) {
+    // Use shimmer effect on placeholder items
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+    ) {
+        ShimmerEffect(modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
         )
 
     }

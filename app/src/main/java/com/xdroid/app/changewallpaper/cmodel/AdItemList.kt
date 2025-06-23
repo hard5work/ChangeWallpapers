@@ -27,6 +27,8 @@ data class AdItem(
     val store: String? = null,
     val title: String? = null,
     val type: String? = null,
+    @SerializedName("app_id")
+    val appId: String? = null,
     val status: Boolean? = false,
     val updated: String? = null
 ) : Serializable

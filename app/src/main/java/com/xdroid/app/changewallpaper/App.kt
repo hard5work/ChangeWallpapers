@@ -20,6 +20,8 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.appopen.AppOpenAd
+import com.unity3d.ads.UnityAds
+import com.unity3d.ads.metadata.MetaData
 import com.xdroid.app.changewallpaper.di.module.appModule
 import com.xdroid.app.changewallpaper.di.module.repoModule
 import com.xdroid.app.changewallpaper.di.module.viewModelModule
@@ -30,6 +32,7 @@ import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
 import com.xdroid.app.changewallpaper.utils.constants.PrefConstant
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.PreferenceHelper
+import gatewayprotocol.v1.initializationData
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -51,6 +54,14 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         baseApplication = this
         preferenceHelper = PreferenceHelper(this)
         MobileAds.initialize(this)
+        val gdprMetaData = MetaData(this)
+        gdprMetaData["gdpr.consent"] = true
+        gdprMetaData.commit()
+
+        val ccpaMetaData = MetaData(this)
+        ccpaMetaData["privacy.consent"] = true
+        ccpaMetaData.commit()
+
         loadInterstitial(this)
         loadAppOpenAd()
         registerActivityLifecycleCallbacks(this)
@@ -115,7 +126,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
     fun loadAppOpenAd() {
         val adRequest = AdRequest.Builder().build()
         var countAd = preferenceHelper.getValue(PrefConstant.OPENAPPAD, 0) as Int
-        if (countAd > 10)
+        if (countAd > 3)
             AppOpenAd.load(
                 this, getString(R.string.openApp), adRequest,
                 object : AppOpenAd.AppOpenAdLoadCallback() {
@@ -152,6 +163,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
                     appOpenAd = null
                     isShowingAd = false
 //                    loadAppOpenAd()
+                    preferenceHelper.setValue(PrefConstant.OPENAPPAD, 0)
                 }
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
@@ -163,7 +175,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
                     isShowingAd = true
                 }
             }
-            preferenceHelper.setValue(PrefConstant.OPENAPPAD, 0)
             appOpenAd?.show(currentActivity!!)
         } else {
             onAdDismissed()

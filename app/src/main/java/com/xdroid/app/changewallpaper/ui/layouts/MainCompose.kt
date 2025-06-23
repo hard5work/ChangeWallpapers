@@ -42,6 +42,10 @@ fun MyApp() {
             FavoriteScreen(navController)
         }
 
+        composable(ScreenName.Feedbacks) {
+            FeedbackScreen(navController)
+        }
+
     }
 
 //    LaunchedEffect(navController) {

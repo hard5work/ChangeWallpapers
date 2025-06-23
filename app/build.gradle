@@ -54,6 +54,8 @@ android {
             // You can customize different aspects of the flavor, such as applicationId, versionCode, versionName, etc.
             versionCode = 8
             versionName = "1.0.8"
+
+            buildConfigField 'String', 'APP_ID', "\"srk_app\""
         }
 
         create("salman") {
@@ -62,6 +64,7 @@ android {
             versionCode = 8
             dimension = "environment"
             versionName = "1.0.8"
+            buildConfigField 'String', 'APP_ID', "\"salman_app\""
 
         }
         create("anime") {
@@ -69,6 +72,7 @@ android {
             versionCode = 23 //13
             dimension = "environment"
             versionName = "1.0.23" //13
+            buildConfigField 'String', 'APP_ID', "\"anime_app\""
 
         }
 
@@ -77,6 +81,7 @@ android {
             versionCode = 9
             dimension = "environment"
             versionName = "1.0.9"
+            buildConfigField 'String', 'APP_ID', "\"artistic_app\""
 
         }
         create("all") {
@@ -84,6 +89,7 @@ android {
             versionCode = 9
             dimension = "environment"
             versionName = "1.0.9"
+            buildConfigField 'String', 'APP_ID', "\"all_app\""
 
         }
 
@@ -94,25 +100,29 @@ android {
             versionCode = 2
             dimension = "environment"
             versionName = "1.0.2"
+            buildConfigField 'String', 'APP_ID', "\"hrithik_app\""
 
         }
         create("ronaldo") {
             applicationIdSuffix = ".ronaldo"
-            versionCode = 14
+            versionCode = 15
             dimension = "environment"
-            versionName = "1.0.14"
+            versionName = "1.0.15"
+            buildConfigField 'String', 'APP_ID', "\"ronaldo_app\""
         }
         create("messi") {
             applicationIdSuffix = ".messi"
             versionCode = 11
             dimension = "environment"
             versionName = "1.0.11"
+            buildConfigField 'String', 'APP_ID', "\"messi_app\""
         }
         create("anim") {
             applicationIdSuffix = ".anim"
             versionCode = 2
             dimension = "environment"
             versionName = "1.0.2"
+            buildConfigField 'String', 'APP_ID', "\"anim_app\""
 
         }
 
@@ -121,6 +131,7 @@ android {
             versionCode = 8
             dimension = "environment"
             versionName = "1.0.8"
+            buildConfigField 'String', 'APP_ID', "\"kdrama_app\""
 
         }
 
@@ -220,10 +231,16 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
 //    implementation libs.vungle.ads
-//    implementation(libs.unity.ads)
-//    implementation(libs.unity)
+    //Ads  Mediations
+    implementation(libs.unity.ads)
+    implementation(libs.unity.mediation)
+    implementation(libs.facebook)
     // Room
     implementation libs.androidx.room.runtime
     implementation libs.androidx.room.ktx
     ksp libs.androidx.room.compiler
+
+    implementation(libs.landscapist.glide)
+
+    implementation(libs.user.messaging.platform)
 }

@@ -52,10 +52,16 @@ import androidx.navigation.compose.rememberNavController
 import com.chartboost.sdk.Chartboost.startWithAppId
 import com.chartboost.sdk.callbacks.StartCallback
 import com.chartboost.sdk.events.StartError
+import com.google.android.gms.ads.MobileAds
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.google.android.ump.ConsentDebugSettings
+import com.google.android.ump.ConsentInformation
+import com.google.android.ump.ConsentRequestParameters
+import com.google.android.ump.UserMessagingPlatform
+import com.unity3d.ads.metadata.MetaData
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.BuildConfig
 import com.xdroid.app.changewallpaper.R
@@ -91,14 +97,20 @@ import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+
+        const val TEST_DEVICE_HASHED_ID = "ABCDEF012345"
+    }
+
     lateinit var timer: CountDownTimer
     var showAlert: Boolean = false
 
-
+    private lateinit var googleMobileAdsConsentManager: GoogleMobileAdsConsentManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        OpenApp.showAppOpenAdIfAvailable(this)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
+
 
 
         App.preferenceHelper.setValue(PrefConstant.COUNTER, 0)
@@ -170,6 +182,34 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        googleMobileAdsConsentManager =
+            GoogleMobileAdsConsentManager.getInstance(applicationContext)
+
+        DebugMode.e("${googleMobileAdsConsentManager.canRequestAds}")
+        googleMobileAdsConsentManager.gatherConsent(this) { error ->
+            if (error != null) {
+                // Consent not obtained in current session.
+                DebugMode.e("${error.errorCode}: ${error.message}")
+            }
+
+            if (googleMobileAdsConsentManager.canRequestAds) {
+
+                MobileAds.initialize(this)
+            }
+
+            if (googleMobileAdsConsentManager.isPrivacyOptionsRequired) {
+                // Regenerate the options menu to include a privacy setting.
+                invalidateOptionsMenu()
+            }
+        }
+
+        // This sample attempts to load ads using consent obtained in the previous session.
+        if (googleMobileAdsConsentManager.canRequestAds) {
+
+            MobileAds.initialize(this)
+        }
+
+
 
 
     }

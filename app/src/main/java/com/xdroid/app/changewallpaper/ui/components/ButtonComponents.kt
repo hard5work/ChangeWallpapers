@@ -382,7 +382,7 @@ fun AutoAdSliderNetwork(banner: List<AdItem>, modifier: Modifier = Modifier) {
 
 
 fun activeList(banners: List<AdItem>): List<AdItem> {
-    return banners.filter { it.status.isNull() }
+    return banners.filter { it.status.isNull() && it.appId != BuildConfig.APP_ID}
 
 }
 

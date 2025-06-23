@@ -56,6 +56,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.chartboost.sdk.impl.wa
 import com.google.android.gms.ads.nativead.NativeAd
+import com.skydoves.landscapist.ImageOptions
 import com.xdroid.app.changewallpaper.App
 import com.xdroid.app.changewallpaper.data.UrlName
 import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
@@ -106,8 +107,12 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
     var isDataLoaded by rememberSaveable { mutableStateOf(false) }
     var isFav by rememberSaveable { mutableStateOf(false) }
 
-    fun checkFav() {
+
+    LaunchedEffect(Unit){
         favoriteViewModel.loadSingleItem(imageUrl)
+    }
+    fun checkFav() {
+//        favoriteViewModel.loadSingleItem(imageUrl)
         isFav = isFavorite != null
 
         DebugMode.e("IS Fav = $isFav ${notes.size}")
@@ -191,13 +196,33 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
 
 
     Box(modifier = Modifier.fillMaxSize()) {
+//
+//        GlideImage(
+//            model = imageUrl,
+//            contentDescription = "Image",
+//            modifier = Modifier
+//                .fillMaxSize(),
+//            contentScale = ContentScale.Crop
+//        )
+        com.skydoves.landscapist.glide.GlideImage(
+            imageModel = { imageUrl },
+            loading = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    FullScreenShimmer()
 
-        GlideImage(
-            model = imageUrl,
-            contentDescription = "Image",
-            modifier = Modifier
-                .fillMaxSize(),
-            contentScale = ContentScale.Crop
+                }
+            },
+            failure = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
+                    Text("Image failed to load.")
+
+                }
+            },
+
+            modifier = Modifier.fillMaxSize()
+                .clip(RoundedCornerShape(8.dp)),
+            imageOptions = ImageOptions(contentScale = ContentScale.Crop)
         )
 
         IconButton(
@@ -280,7 +305,7 @@ fun WallpaperChangerApp(navController: NavController, imageUrl: String) {
 
                 Button(
                     onClick = {
-                        if (favour == 5) {
+                        if (favour >= 5) {
                             if (mInterstitialAd == null) {
                                 loadInterstitial(context) { _ ->
                                     showInterstitial(context) {

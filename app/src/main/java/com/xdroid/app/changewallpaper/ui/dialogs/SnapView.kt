@@ -31,10 +31,12 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.nativead.NativeAd
 import com.xdroid.app.changewallpaper.R
 import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
+import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
 import com.xdroid.app.changewallpaper.ui.components.ButtonComponent
 import com.xdroid.app.changewallpaper.ui.components.OutlineButtonComponent
+import com.xdroid.app.changewallpaper.ui.layouts.ShimmerAdPlaceHolder
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -397,7 +399,7 @@ fun CustomAlertDialogWithAds(
     onDismissButtonClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
+    /*val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
     val adView = remember {
         AdView(context).apply {
 //            setAdSize(AdSize.LARGE_BANNER)
@@ -412,12 +414,20 @@ fun CustomAlertDialogWithAds(
             setAdSize(adSize)
             adUnitId = adUnitIds
         }
+    }*/
+    var nativeAd2 by remember { mutableStateOf<NativeAd?>(null) }
+
+
+    LaunchedEffect(Unit) {
+        NativeAdManager.loadNativeAd(context) { ad ->
+            nativeAd2 = ad
+        }
     }
     // Keep track of the loading state
     var isLoading by rememberSaveable { mutableStateOf(true) }
     var isAdError by rememberSaveable { mutableStateOf(false) }
 
-    // Set the AdListener only once
+   /* // Set the AdListener only once
     DisposableEffect(adView) {
         val adListener = object : AdListener() {
             override fun onAdLoaded() {
@@ -437,7 +447,7 @@ fun CustomAlertDialogWithAds(
         onDispose {
             adView.adListener = object : AdListener() {}
         }
-    }
+    }*/
 
     var d0 by rememberSaveable { mutableStateOf(false) }
     var d1 by rememberSaveable { mutableStateOf(false) }
@@ -448,10 +458,10 @@ fun CustomAlertDialogWithAds(
     }
 
 
-    // Load the ad only once
-    LaunchedEffect(adView) {
-        adView.loadAd(AdRequest.Builder().build())
-    }
+//    // Load the ad only once
+//    LaunchedEffect(adView) {
+//        adView.loadAd(AdRequest.Builder().build())
+//    }
 
     AlertDialog(
         onDismissRequest = { onDismissButtonClick() },
@@ -484,7 +494,12 @@ fun CustomAlertDialogWithAds(
                     text = message,
                 )
                 Spacer(Modifier.height(10.dp))
-                ListBannerAdView(adView, isLoading, isAdError)
+//                ListBannerAdView(adView, isLoading, isAdError)
+                if (nativeAd2 == null) {
+                    ShimmerAdPlaceHolder()
+                } else {
+                    AdmobNativeAd(nativeAd2)
+                }
 
             }
         },
@@ -544,47 +559,56 @@ fun InfoAlertDialogWithAds(
     onConfirmButtonClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
-    val adView = remember {
-        AdView(context).apply {
-            val displayMetrics = context.resources.displayMetrics
-            val density = displayMetrics.density
-            val adWidthPixels = displayMetrics.widthPixels.toFloat()
-            val adWidth = (adWidthPixels / density).toInt() -100
+//    val adUnitIds = rememberSaveable { context.getString(R.string.centerBanner) }
+//    val adView = remember {
+//        AdView(context).apply {
+//            val displayMetrics = context.resources.displayMetrics
+//            val density = displayMetrics.density
+//            val adWidthPixels = displayMetrics.widthPixels.toFloat()
+//            val adWidth = (adWidthPixels / density).toInt() -100
+//
+//            // Adaptive banner size
+//            val adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth)
+//
+//            setAdSize(adSize)
+////            setAdSize(AdSize.LARGE_BANNER)
+//            adUnitId = adUnitIds
+//        }
+//    }
+    var nativeAd2 by remember { mutableStateOf<NativeAd?>(null) }
 
-            // Adaptive banner size
-            val adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth)
 
-            setAdSize(adSize)
-//            setAdSize(AdSize.LARGE_BANNER)
-            adUnitId = adUnitIds
+        LaunchedEffect(Unit) {
+            NativeAdManager.loadNativeAd(context) { ad ->
+                nativeAd2 = ad
+            }
         }
-    }
+
     // Keep track of the loading state
     var isLoading by rememberSaveable { mutableStateOf(true) }
     var isAdError by rememberSaveable { mutableStateOf(false) }
 
-    // Set the AdListener only once
-    DisposableEffect(adView) {
-        val adListener = object : AdListener() {
-            override fun onAdLoaded() {
-                DebugMode.e("Banner ad load success")
-                isLoading = false
-                isAdError = false
-            }
-
-            override fun onAdFailedToLoad(error: LoadAdError) {
-                DebugMode.e("Banner ad load Failed-> ${error.message}")
-                isLoading = false
-                isAdError = true
-            }
-        }
-        adView.adListener = adListener
-
-        onDispose {
-            adView.adListener = object : AdListener() {}
-        }
-    }
+//    // Set the AdListener only once
+//    DisposableEffect(adView) {
+//        val adListener = object : AdListener() {
+//            override fun onAdLoaded() {
+//                DebugMode.e("Banner ad load success")
+//                isLoading = false
+//                isAdError = false
+//            }
+//
+//            override fun onAdFailedToLoad(error: LoadAdError) {
+//                DebugMode.e("Banner ad load Failed-> ${error.message}")
+//                isLoading = false
+//                isAdError = true
+//            }
+//        }
+//        adView.adListener = adListener
+//
+//        onDispose {
+//            adView.adListener = object : AdListener() {}
+//        }
+//    }
 
     var d0 by rememberSaveable { mutableStateOf(false) }
     var d1 by rememberSaveable { mutableStateOf(false) }
@@ -594,11 +618,11 @@ fun InfoAlertDialogWithAds(
         d1 = dismissOnBackPress
     }
 
-
-    // Load the ad only once
-    LaunchedEffect(adView) {
-        adView.loadAd(AdRequest.Builder().build())
-    }
+//
+//    // Load the ad only once
+//    LaunchedEffect(adView) {
+//        adView.loadAd(AdRequest.Builder().build())
+//    }
 
     AlertDialog(
         onDismissRequest = { onConfirmButtonClick()},
@@ -623,7 +647,13 @@ fun InfoAlertDialogWithAds(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Spacer(Modifier.height(10.dp))
-                ListBannerAdView(adView, isLoading, isAdError)
+//                ListBannerAdView(adView, isLoading, isAdError)
+
+                if (nativeAd2 == null) {
+                    ShimmerAdPlaceHolder()
+                } else {
+                    AdmobNativeAd(nativeAd2)
+                }
 
             }
         },

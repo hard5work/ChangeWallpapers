@@ -24,3 +24,8 @@ object NetworkError {
     const val DATA_EXCEPTION = "Internal Error. Retry later"
     const val NO_INTERNET_CONNECTION = "No internet connection."
 }
+
+object StringCoded{
+    const val issueMsg ="Your issue has been successfully submitted to the admin. We will contact you via email shortly."
+    const val feedbackMsg ="Thank you for your feedback. It has been successfully submitted. "
+}

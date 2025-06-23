@@ -8,7 +8,7 @@ object UrlName {
     val animeImages = "pictures/records?filter=(category=%27anime%27)&page=1&perPage=100&sort=-created"
     val imageUrl = "https://anish.pockethost.io/api/files/"
     val adUrl = "ad/records?filter=(type=%27centerBanner%27)"
-
+    const val feedback = "all_feedback/records"
     //https://anish.pockethost.io/api/files/wwjrt47yl200yjk/f516np26xa3ipy8/animemediumbanner_nF8NIPuBNE.gif
 //srk1_Bpy6hGNxrp.jpeg //srk1_Bpy6hGNxrp.jpeg?token=
 }

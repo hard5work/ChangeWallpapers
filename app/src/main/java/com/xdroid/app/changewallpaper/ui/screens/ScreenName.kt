@@ -21,6 +21,7 @@ object ScreenName {
     const val Detail = "Detail"
     const val Settings = "Settings"
     const val Favorites = "Favorites"
+    const val Feedbacks = "Feedbacks"
 
     //Services
     const val DataPack = "DataPack"

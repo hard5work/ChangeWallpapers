@@ -25,7 +25,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Reviews
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
@@ -109,6 +111,10 @@ fun SettingScreen(
                 Intent.createChooser(shareIntent, "Share via")
             )
         }
+        Spacer(Modifier.height(12.dp))
+        ProfileMenu(icon = Icons.Default.Feedback, name = "Feedbacks") {
+            navController.navigate(ScreenName.Feedbacks)
+        }
 
         Spacer(Modifier.height(12.dp))
         SettingsMenu(context)
@@ -138,6 +144,11 @@ private fun Header(navController: NavController) {
 @Composable
 private fun SettingsMenu(context: Context) {
     val settingsItems = listOf(
+        SettingItem(
+            icon = Icons.Default.PrivacyTip,
+            title = "Privacy and Policy",
+            url = "https://joyfuljunctureblogs.blogspot.com/2025/06/privacy-policy.html"
+        ),
         SettingItem(
             icon = GooglePlay,
             title = "Google Apps",

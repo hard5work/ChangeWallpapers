@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.ProgressDialog.show
 import android.content.Context
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.Button
@@ -52,6 +53,7 @@ import com.chartboost.sdk.events.DismissEvent
 import com.chartboost.sdk.events.ImpressionEvent
 import com.chartboost.sdk.events.ShowError
 import com.chartboost.sdk.events.ShowEvent
+import com.google.ads.mediation.facebook.FacebookMediationAdapter
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -589,6 +591,7 @@ object NativeAdManager {
     private var nativeAd: NativeAd? = null
 //    private const// Test Ad ID
 
+
     fun loadNativeAd(context: Context, onAdLoaded: (NativeAd?) -> Unit) {
         val AD_UNIT_ID = context.getString(R.string.nativeAds)
         val adLoader = AdLoader.Builder(context, AD_UNIT_ID)
@@ -657,6 +660,15 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
 //                bodyView.id = 3
                 linearLayout.addView(bodyView)
 
+                // ✅ Social Context (Facebook only)
+                val socialContextView = TextView(ctx).apply {
+                    setTextColor(white.toArgb())
+                    setPadding(10)
+                    textSize = 14f
+                    visibility = View.GONE
+                }
+                linearLayout.addView(socialContextView)
+
 
                 val callToActionView = Button(ctx)
                 callToActionView.setBackgroundColor(colorPrimary.toArgb())
@@ -670,10 +682,10 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
 ////                priceView.id = 6
 //                linearLayout.addView(priceView)
 //
-                val starRatingView = RatingBar(ctx, null, android.R.attr.ratingBarStyleSmall)
+//                val starRatingView = RatingBar(ctx, null, android.R.attr.ratingBarStyleSmall)
 //                starRatingView.id = 7
-                starRatingView.numStars = 5
-                linearLayout.addView(starRatingView)
+//                starRatingView.numStars = 5
+//                linearLayout.addView(starRatingView)
 
 //                val storeView = TextView(ctx)
 ////                storeView.id = 8
@@ -691,11 +703,22 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
                 adView.iconView = iconView
                 adView.callToActionView = callToActionView
 //                adView.priceView = priceView
-                adView.starRatingView = starRatingView
+//                adView.starRatingView = starRatingView
 //                adView.storeView = storeView
 //                adView.advertiserView = advertiserView
 
                 populateNativeAdView(ad, adView)
+
+                // ✅ Set Facebook social context if available
+                val extras = ad.extras
+                if (extras.containsKey(FacebookMediationAdapter.KEY_SOCIAL_CONTEXT_ASSET)) {
+                    val socialContext =
+                        extras.getString(FacebookMediationAdapter.KEY_SOCIAL_CONTEXT_ASSET)
+                    socialContextView.text = socialContext
+                    socialContextView.visibility = View.VISIBLE
+                } else {
+                    socialContextView.visibility = View.GONE
+                }
 
                 adView
             },
@@ -749,12 +772,12 @@ private fun populateNativeAdView(nativeAd: NativeAd, adView: NativeAdView) {
 //        (adView.storeView as TextView).text = nativeAd.store
 //    }
 //
-    if (nativeAd.starRating == null) {
-        adView.starRatingView?.visibility = android.view.View.INVISIBLE
-    } else {
-        adView.starRatingView?.visibility = android.view.View.VISIBLE
-        (adView.starRatingView as RatingBar).rating = nativeAd.starRating!!.toFloat()
-    }
+//    if (nativeAd.starRating == null) {
+//        adView.starRatingView?.visibility = android.view.View.INVISIBLE
+//    } else {
+//        adView.starRatingView?.visibility = android.view.View.VISIBLE
+//        (adView.starRatingView as RatingBar).rating = nativeAd.starRating!!.toFloat()
+//    }
 //
 //    if (nativeAd.advertiser == null) {
 //        adView.advertiserView?.visibility = android.view.View.INVISIBLE
