@@ -34,9 +34,12 @@ import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.ListBannerAdView
 import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
+import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdState
 import com.xdroid.app.changewallpaper.ui.components.ButtonComponent
 import com.xdroid.app.changewallpaper.ui.components.OutlineButtonComponent
+import com.xdroid.app.changewallpaper.ui.layouts.NativeAdContainer
 import com.xdroid.app.changewallpaper.ui.layouts.ShimmerAdPlaceHolder
+import com.xdroid.app.changewallpaper.ui.layouts.ShimmerAdPlaceHolder2
 import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -415,7 +418,7 @@ fun CustomAlertDialogWithAds(
             adUnitId = adUnitIds
         }
     }*/
-    var nativeAd2 by remember { mutableStateOf<NativeAd?>(null) }
+    var nativeAd2 by remember { mutableStateOf<NativeAdState>(NativeAdState.Loading) }
 
 
     LaunchedEffect(Unit) {
@@ -495,11 +498,7 @@ fun CustomAlertDialogWithAds(
                 )
                 Spacer(Modifier.height(10.dp))
 //                ListBannerAdView(adView, isLoading, isAdError)
-                if (nativeAd2 == null) {
-                    ShimmerAdPlaceHolder()
-                } else {
-                    AdmobNativeAd(nativeAd2)
-                }
+                NativeAdContainer(nativeAd2)
 
             }
         },
@@ -515,13 +514,13 @@ fun CustomAlertDialogWithAds(
                     OutlineButtonComponent(
                         label = dismissButtonText,
                         onClick = { onDismissButtonClick() },
-                        width = 120
+                        width = 180
 
                     )
                     ButtonComponent(
                         label = confirmButtonText,
                         onClick = { onConfirmButtonClick() },
-                        width = 120
+                        width = 180
 
                     )
                 }
@@ -575,7 +574,7 @@ fun InfoAlertDialogWithAds(
 //            adUnitId = adUnitIds
 //        }
 //    }
-    var nativeAd2 by remember { mutableStateOf<NativeAd?>(null) }
+    var nativeAd2 by remember { mutableStateOf<NativeAdState>(NativeAdState.Loading) }
 
 
         LaunchedEffect(Unit) {
@@ -648,12 +647,7 @@ fun InfoAlertDialogWithAds(
                 Spacer(modifier = Modifier.height(10.dp))
                 Spacer(Modifier.height(10.dp))
 //                ListBannerAdView(adView, isLoading, isAdError)
-
-                if (nativeAd2 == null) {
-                    ShimmerAdPlaceHolder()
-                } else {
-                    AdmobNativeAd(nativeAd2)
-                }
+NativeAdContainer(nativeAd2)
 
             }
         },
@@ -669,7 +663,7 @@ fun InfoAlertDialogWithAds(
                     ButtonComponent(
                         label = confirmButtonText,
                         onClick = { onConfirmButtonClick() },
-                        width = 120
+                        width = 180
 
                     )
                 }

@@ -176,8 +176,10 @@ fun FavoriteScreen(
                                 .height(spaceHeight)
                         )
 
-                        if (!showView)
+                        if (!showView) {
+                            AdComposable(null)
                             LoadingContent()
+                        }
                         //                    CircularProgressIndicator(color = Color.White)
 
                         if (showView) {
@@ -210,6 +212,8 @@ fun FavoriteScreen(
                                         )
                                     }
                                 }
+                                Spacer(Modifier.height(30.dp))
+                                AdComposable()
 
                             }
 

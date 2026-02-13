@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -56,6 +57,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -90,6 +93,7 @@ import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
 import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.BannerAdView2
 import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdManager
+import com.xdroid.app.changewallpaper.ui.adscreen.NativeAdState
 import com.xdroid.app.changewallpaper.ui.adscreen.RewardedAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.showInterstitial
 import com.xdroid.app.changewallpaper.ui.components.AutoAdSliderNetwork
@@ -98,7 +102,10 @@ import com.xdroid.app.changewallpaper.ui.dialogs.CustomAlertDialogWithAds
 import com.xdroid.app.changewallpaper.ui.dialogs.InfoAlertDialog
 import com.xdroid.app.changewallpaper.ui.dialogs.LoadingAlertDialog
 import com.xdroid.app.changewallpaper.ui.screens.ScreenName
+import com.xdroid.app.changewallpaper.ui.theme.backGroundColor
+import com.xdroid.app.changewallpaper.ui.theme.background
 import com.xdroid.app.changewallpaper.ui.theme.black
+import com.xdroid.app.changewallpaper.ui.theme.latoLight10
 import com.xdroid.app.changewallpaper.ui.theme.latoRegular12
 import com.xdroid.app.changewallpaper.ui.theme.latoRegular16
 import com.xdroid.app.changewallpaper.ui.theme.white
@@ -258,13 +265,17 @@ fun HomeScreen(
                     if (networkHelper.isNetworkConnected()) {
 
                         activity?.let {
-                            RewardedAdManager.showAd(it) { _ ->
+                            RewardedAdManager.showAd(it, onRewardEarned = { _ ->
                                 val ite = myImages[Random().nextInt(myImages.size)]
                                 val image = "${ite.collectionID}/${ite.id}/${ite.image}"
-                                finalImage = imageUrl + image
+                                finalImage = image
                                 DebugMode.e("Items in Settings $finalImage")
                                 showRewards = true
-                            }
+                            } ,status = { it->
+                                showAlert = !it
+                                alertMessage ="Ad not ready"
+
+                            })
                         }
 //            }
                     }else{
@@ -301,8 +312,10 @@ fun HomeScreen(
                                 .height(spaceHeight)
                         )
 
-                        if (!showView)
+                        if (myImages.isEmpty()) {
+//                            AdComposable()
                             LoadingContent()
+                        }
                         //                    CircularProgressIndicator(color = Color.White)
 
                         if (showView) {
@@ -435,12 +448,27 @@ fun createItemModel(
             val colID = data.collectionID
             val createdAt = data.created
             dataImages.clear()
-            for (img in data.images!!) {
+            for (img in data.images?:emptyList()) {
                 dataImages.add(
                     MyItems(
                         collectionID = colID,
                         id = id,
-                        image = img,
+                        image =  if (data.collectionID.isNullOrEmpty() && data.id.isNullOrEmpty()) data.image.isNull()
+                            .split(
+                                UrlName.imageUrl
+                            )[1] else
+                            UrlName.imageUrl+"${data.collectionID}/${data.id}/$img",
+                        created = createdAt,
+                        combineID = "$id/_$colID/_${data.name}/_$img"
+                    )
+                )
+            }
+            for (img in data.urls?:emptyList()) {
+                dataImages.add(
+                    MyItems(
+                        collectionID = colID,
+                        id = id,
+                        image = img.url,
                         created = createdAt,
                         combineID = "$id/_$colID/_${data.name}/_$img"
                     )
@@ -487,12 +515,19 @@ fun ActionsItemList(
             adUnitId = adUnitIds
         }
     }
-    var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
+    var nativeAd  by remember { mutableStateOf<NativeAdState>(NativeAdState.Loading) }
 
     // Load the ad when the screen appears
     LaunchedEffect(Unit) {
         NativeAdManager.loadNativeAd(context) { ad ->
             nativeAd = ad
+        }
+    }
+    DisposableEffect(nativeAd) {
+        onDispose {
+            if (nativeAd is NativeAdState.Loaded) {
+                (nativeAd as NativeAdState.Loaded).ad.destroy()
+            }
         }
     }
 
@@ -528,7 +563,8 @@ fun ActionsItemList(
     LazyVerticalGrid(
         columns = GridCells.Fixed(count),
 //        verticalItemSpacing = 2.dp,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
 //        if (items != null)
@@ -582,12 +618,12 @@ fun ActionsItemList(
         }) { index ->
             if (newitems[index] is MyItems) {
                 val ite = newitems[index] as MyItems
-                val images =
-                    if (ite.collectionID.isNullOrEmpty() && ite.id.isNullOrEmpty()) ite.image.isNull()
-                        .split(
-                            UrlName.imageUrl
-                        )[1] else
-                        "${ite.collectionID}/${ite.id}/${ite.image}"
+                val images = ite.image
+//                    if (ite.collectionID.isNullOrEmpty() && ite.id.isNullOrEmpty()) ite.image.isNull()
+//                        .split(
+//                            UrlName.imageUrl
+//                        )[1] else
+//                        "${ite.collectionID}/${ite.id}/${ite.image}"
                 val rememberImages = remember {
                     images
                 }
@@ -617,6 +653,7 @@ fun itemsWithAds(items: List<MyItems>?): List<Any> {
     return mixedList
 }
 
+@SuppressLint("UseKtx")
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ActionItems(
@@ -628,7 +665,7 @@ fun ActionItems(
     var counter by remember {
         mutableIntStateOf(App.preferenceHelper.getValue(PrefConstant.COUNTER, 0) as Int)
     }
-    val imageUrl = remember { UrlName.imageUrl + item }
+    val imageUrl = remember {  item }
     var navigate by remember {
         mutableStateOf(
             false
@@ -683,9 +720,17 @@ fun ActionItems(
                 }
             },
             failure = {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Gray), contentAlignment = Alignment.Center,
 
-                    Text("Image failed to load.")
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(Icons.Outlined.Info, contentDescription = "Help")
+                        Text("Image failed to load.", style = latoLight10)
+
+                    }
 
                 }
             },
@@ -711,7 +756,7 @@ fun ActionItems(
                 ScreenName.detailRoute(
                     screen,
 //                        UrlName.imageUrl + "${item?.collectionID}/${item?.id}/${item?.image}"
-                    Uri.parse(UrlName.imageUrl + item).toString()
+                    Uri.parse(item).toString()
                 )
             )
             counter += 1
@@ -751,10 +796,80 @@ fun AdComposable(
     isLoading: Boolean,
     isAdError: Boolean,
     adBanner: AdModel?,
-    nativeAd: NativeAd?
+    nativeAd: NativeAdState?
 ) {
-    var nativeAd2 by remember { mutableStateOf<NativeAd?>(null) }
+//    var nativeAd2 by remember { mutableStateOf<NativeAd?>(null) }
+    var nativeAd2 by remember { mutableStateOf<NativeAdState>(NativeAdState.Loading) }
 
+
+    val context = LocalContext.current
+    // Load the ad when the screen appears
+    if (nativeAd2 == null) {
+        LaunchedEffect(Unit) {
+            NativeAdManager.loadNativeAd(context) { ad ->
+                nativeAd2 = ad
+            }
+        }
+    } else {
+        if (nativeAd == null) {
+            LaunchedEffect(Unit) {
+                NativeAdManager.loadNativeAd(context) { ad ->
+                    nativeAd2 = ad
+                }
+            }
+        } else {
+            LaunchedEffect(Unit) {
+                nativeAd2 = nativeAd
+            }
+        }
+    }
+    Column(
+        modifier = Modifier
+            .padding(5.dp)
+            .clip(RoundedCornerShape(8.dp)),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        BannerAdView2()
+        Spacer(modifier = Modifier.height(5.dp))
+        AdSection(adBanner)
+        Spacer(modifier = Modifier.height(5.dp))
+//        when (val state = nativeAd2) {
+//
+//            is NativeAdState.Loading -> {
+//                ShimmerAdPlaceHolder2()
+//            }
+//
+//            is NativeAdState.Loaded -> {
+//                AdmobNativeAd(state.ad)
+//            }
+//
+//            is NativeAdState.Failed -> {
+//                // Remove ad space completely
+//                Spacer(modifier = Modifier.height(0.dp))
+//            }
+//        }
+        NativeAdContainer(nativeAd2)
+//        AdmobNativeAd(nativeAd2)
+//        ListBannerAdView(adView, isLoading, isAdError)
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+    }
+
+}
+
+
+@Composable
+fun AdComposable(
+    nativeAd: NativeAdState? = null
+) {
+    var nativeAd2 by remember {
+        mutableStateOf<NativeAdState>(NativeAdState.Loading)
+    }
 
     val context = LocalContext.current
     // Load the ad when the screen appears
@@ -777,25 +892,35 @@ fun AdComposable(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Spacer(modifier = Modifier.height(5.dp))
-
-        BannerAdView2()
-        Spacer(modifier = Modifier.height(5.dp))
-        AdSection(adBanner)
-        Spacer(modifier = Modifier.height(5.dp))
-        if (nativeAd2 == null) {
-            ShimmerAdPlaceHolder()
-        } else {
-            AdmobNativeAd(nativeAd2)
-        }
-//        AdmobNativeAd(nativeAd2)
-//        ListBannerAdView(adView, isLoading, isAdError)
+            NativeAdContainer(nativeAd2)
 
         Spacer(modifier = Modifier.height(5.dp))
 
     }
 
 }
+
+@Composable
+fun NativeAdContainer(
+    adState: NativeAdState
+) {
+    when (val state = adState) {
+
+        is NativeAdState.Loading -> {
+            ShimmerAdPlaceHolder2()
+        }
+
+        is NativeAdState.Loaded -> {
+            // In real app:
+            AdmobNativeAd(state.ad)
+        }
+
+        is NativeAdState.Failed -> {
+            Spacer(modifier = Modifier.height(0.dp))
+        }
+    }
+}
+
 
 
 fun closeApp(context: Context) {

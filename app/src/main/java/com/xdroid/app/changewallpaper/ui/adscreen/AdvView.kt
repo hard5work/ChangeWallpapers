@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.ProgressDialog.show
 import android.content.Context
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -53,6 +54,7 @@ import com.chartboost.sdk.events.DismissEvent
 import com.chartboost.sdk.events.ImpressionEvent
 import com.chartboost.sdk.events.ShowError
 import com.chartboost.sdk.events.ShowEvent
+import com.chartboost.sdk.impl.ad
 import com.google.ads.mediation.facebook.FacebookMediationAdapter
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.appopen.AppOpenAd
@@ -562,7 +564,7 @@ object RewardedAdManager {
             })
     }
 
-    fun showAd(activity: Activity, onRewardEarned: (RewardItem) -> Unit) {
+    fun showAd(activity: Activity, onRewardEarned: (RewardItem) -> Unit, status:(Boolean)-> Unit) {
         if (rewardedAd != null) {
             rewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
@@ -574,43 +576,111 @@ object RewardedAdManager {
                 override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) {
                     Log.e("RewardedAd", "Ad failed to show: ${adError.message}")
                     rewardedAd = null
+                    status(false)
                 }
             }
 
             rewardedAd?.show(activity) { rewardItem ->
                 Log.d("RewardedAd", "User earned reward: ${rewardItem.amount} ${rewardItem.type}")
                 onRewardEarned(rewardItem)
+                status(true)
             }
         } else {
             Log.e("RewardedAd", "Ad not ready")
+            status(false)
+            loadAd(context = activity)
         }
     }
 }
+//
+//object NativeAdManager {
+//    private var nativeAd: NativeAd? = null
+////    private const// Test Ad ID
+//
+//
+//    fun loadNativeAd(context: Context, onAdLoaded: (NativeAd?) -> Unit) {
+//        val AD_UNIT_ID = context.getString(R.string.nativeAds)
+//        val adLoader = AdLoader.Builder(context, AD_UNIT_ID)
+//            .forNativeAd { ad ->
+//                Log.d("NativeAd", "Native Ad Loaded")
+//                nativeAd = ad
+//                onAdLoaded(ad)
+//            }
+//            .withAdListener(object : AdListener() {
+//                override fun onAdFailedToLoad(adError: LoadAdError) {
+//                    Log.e("NativeAd", "Failed to load native ad: ${adError.message}")
+//                    onAdLoaded(null)
+//                }
+//            })
+//            .build()
+//
+//        adLoader.loadAd(AdRequest.Builder().build())
+//    }
+//}
+
+sealed class NativeAdState {
+    object Loading : NativeAdState()
+    data class Loaded(val ad: NativeAd) : NativeAdState()
+    object Failed : NativeAdState()
+}
 
 object NativeAdManager {
-    private var nativeAd: NativeAd? = null
-//    private const// Test Ad ID
 
+    private var currentNativeAd: NativeAd? = null
+    private var isLoading = false
 
-    fun loadNativeAd(context: Context, onAdLoaded: (NativeAd?) -> Unit) {
-        val AD_UNIT_ID = context.getString(R.string.nativeAds)
-        val adLoader = AdLoader.Builder(context, AD_UNIT_ID)
-            .forNativeAd { ad ->
+    fun loadNativeAd(
+        context: Context,
+//        onAdLoaded: (NativeAd?) -> Unit,
+        onStateChanged: (NativeAdState) -> Unit
+    ) {
+        if (isLoading) return
+
+        isLoading = true
+
+        onStateChanged(NativeAdState.Loading)
+
+        val adUnitId = context.getString(R.string.nativeAds)
+
+        val adLoader = AdLoader.Builder(context, adUnitId)
+            .forNativeAd { newAd ->
+
+                // Destroy previous ad to prevent memory leak
+                currentNativeAd?.destroy()
+
+                currentNativeAd = newAd
+                isLoading = false
+
                 Log.d("NativeAd", "Native Ad Loaded")
-                nativeAd = ad
-                onAdLoaded(ad)
+//                onAdLoaded(newAd)
+                onStateChanged(NativeAdState.Loaded(newAd))
             }
             .withAdListener(object : AdListener() {
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    Log.e("NativeAd", "Failed to load native ad: ${adError.message}")
-                    onAdLoaded(null)
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    isLoading = false
+
+                    Log.e(
+                        "NativeAd",
+                        "Failed to load native ad: ${error.code} - ${error.message}"
+                    )
+
+                    currentNativeAd = null
+//                    onAdLoaded(null)
+                    onStateChanged(NativeAdState.Failed)
                 }
             })
             .build()
 
         adLoader.loadAd(AdRequest.Builder().build())
     }
+
+    fun destroy() {
+        currentNativeAd?.destroy()
+        currentNativeAd = null
+    }
 }
+
 
 @Composable
 fun AdmobNativeAd(nativeAd: NativeAd?) {
@@ -647,18 +717,31 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
                 iconView.setPadding(10)
 //                iconView.id = 5
                 linearLayout.addView(iconView)
+                val horizontalView = LinearLayout(ctx)
+                horizontalView.orientation = LinearLayout.HORIZONTAL
+                horizontalView.layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                horizontalView.setPadding(10)
+                horizontalView.gravity = Gravity.CENTER_VERTICAL
+
+
+                val contentView = LinearLayout(ctx)
+                contentView.orientation = LinearLayout.VERTICAL
+                contentView.layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                contentView.setPadding(10)
+
+
                 val headlineView = TextView(ctx)
                 headlineView.setTextColor(white.toArgb())
                 headlineView.textSize = 24f
                 headlineView.setPadding(10)
 //                headlineView.id = 1
-                linearLayout.addView(headlineView)
+                contentView.addView(headlineView)
 
                 val bodyView = TextView(ctx)
                 bodyView.setTextColor(white.toArgb())
                 bodyView.setPadding(10)
 //                bodyView.id = 3
-                linearLayout.addView(bodyView)
+                contentView.addView(bodyView)
 
                 // ✅ Social Context (Facebook only)
                 val socialContextView = TextView(ctx).apply {
@@ -667,7 +750,21 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
                     textSize = 14f
                     visibility = View.GONE
                 }
-                linearLayout.addView(socialContextView)
+                contentView.addView(socialContextView)
+                val iconView2 = ImageView(ctx)
+                iconView2.setPadding(10)
+                iconView2.layoutParams = LinearLayout.LayoutParams(200,200)
+                val adText2 = TextView(ctx)
+                adText2.setTextColor(white.toArgb())
+                adText2.setPadding(10)
+                adText2.setBackgroundColor(black.toArgb())
+                adText2.text = "Ad"
+                adText2.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+                contentView.addView(adText2)
+
+                horizontalView.addView(iconView2)
+                horizontalView.addView(contentView)
+                linearLayout.addView(horizontalView)
 
 
                 val callToActionView = Button(ctx)
@@ -702,6 +799,7 @@ fun AdmobNativeAd(nativeAd: NativeAd?) {
                 adView.bodyView = bodyView
                 adView.iconView = iconView
                 adView.callToActionView = callToActionView
+                adView.iconView = iconView2
 //                adView.priceView = priceView
 //                adView.starRatingView = starRatingView
 //                adView.storeView = storeView
@@ -756,6 +854,12 @@ private fun populateNativeAdView(nativeAd: NativeAd, adView: NativeAdView) {
             (adView.iconView as ImageView).setImageDrawable(nativeAd.icon?.drawable)
             adView.iconView?.visibility = android.view.View.VISIBLE
         }
+    }
+    if (nativeAd.icon == null) {
+        adView.iconView?.visibility = android.view.View.GONE
+    } else {
+        (adView.iconView as ImageView).setImageDrawable(nativeAd.icon?.drawable)
+        adView.iconView?.visibility = android.view.View.VISIBLE
     }
 //
 //    if (nativeAd.price == null) {

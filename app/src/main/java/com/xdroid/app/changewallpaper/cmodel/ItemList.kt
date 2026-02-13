@@ -28,7 +28,8 @@ data class Item(
     val image: String? = null,
     val images: List<String>? = null,
     val name: String? = null,
-    val updated: String? = null
+    val updated: String? = null,
+    val urls: List<UrlModel>? = null,
 ) : java.io.Serializable
 
 @Entity(tableName = "my_items")
@@ -46,3 +47,7 @@ data class MyItems(
 data class ListItems(
     val items: List<MyItems>
 ) : Serializable
+
+data class UrlModel(
+    val url:String? = null
+): Serializable

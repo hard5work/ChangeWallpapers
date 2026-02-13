@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Reviews
 import androidx.compose.material.icons.filled.Share
@@ -44,7 +45,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,6 +65,7 @@ import com.xdroid.app.changewallpaper.cmodel.ListItems
 import com.xdroid.app.changewallpaper.cmodel.MyItems
 import com.xdroid.app.changewallpaper.data.UrlName
 import com.xdroid.app.changewallpaper.data.UrlName.imageUrl
+import com.xdroid.app.changewallpaper.ui.adscreen.AdmobNativeAd
 import com.xdroid.app.changewallpaper.ui.adscreen.RewardedAdManager
 import com.xdroid.app.changewallpaper.ui.adscreen.loadInterstitial
 import com.xdroid.app.changewallpaper.ui.adscreen.mInterstitialAd
@@ -95,29 +99,81 @@ fun SettingScreen(
     ) {
         Header(navController)
         Spacer(Modifier.height(12.dp))
-        ProfileMenu(icon = Icons.Default.Favorite, name = "Favorites") {
-            navController.navigate(ScreenName.Favorites)
-        }
-        Spacer(Modifier.height(12.dp))
-        ProfileMenu(icon = Icons.Default.Share, name = "Share App") {
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(
-                    Intent.EXTRA_TEXT,
-                    "Check out this awesome app: https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
-                )
+        LazyColumn {
+            item {
+                ProfileMenu(icon = Icons.Default.Favorite, name = "Favorites") {
+                    navController.navigate(ScreenName.Favorites)
+                }
+                Spacer(Modifier.height(12.dp))
+                ProfileMenu(icon = Icons.Default.Share, name = "Share App") {
+                    try {
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Check out this awesome app: https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
+                            )
+                        }
+                        context.startActivity(
+                            Intent.createChooser(shareIntent, "Share via")
+                        )
+                    }
+                    catch (e:Exception){
+                        DebugMode.e(e.message?:"")
+//                        Toast.makeText(context, "No application can handle this URL.", Toast.LENGTH_SHORT)
+//                            .show()
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                ProfileMenu(icon = Icons.Default.Feedback, name = "Feedbacks") {
+                    navController.navigate(ScreenName.Feedbacks)
+                }
+                AdComposable()
+
+                Spacer(Modifier.height(12.dp))
+
+
             }
-            context.startActivity(
-                Intent.createChooser(shareIntent, "Share via")
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-        ProfileMenu(icon = Icons.Default.Feedback, name = "Feedbacks") {
-            navController.navigate(ScreenName.Feedbacks)
+            items(settingsItems().size) { index ->
+                val item = settingsItems()[index]
+                ProfileMenu(icon = item.icon, name = item.title) {
+                    item.url?.let {
+                        openLinkInBrowser(context, it)
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                if ((index + 1) % 5 == 0) {
+                    Column {
+                        AdComposable()
+                        Spacer(Modifier.height(12.dp))
+                    }
+                }
+            }
+            item {
+//                AdComposable()
+
+                Spacer(Modifier.height(12.dp))
+                ProfileMenu(icon = ImageVector.vectorResource(R.drawable.youtube), name = "Follow us on youtube") {
+                    openLinkInBrowser(context, "https://www.youtube.com/@DynamicDuoHearts")
+                }
+                Spacer(Modifier.height(12.dp))
+                ProfileMenu(icon = ImageVector.vectorResource(R.drawable.instagram), name = "Follow us on instagram") {
+                    openLinkInBrowser(context, "https://www.instagram.com/dynamicduohearts/")
+                }
+
+                Spacer(Modifier.height(12.dp))
+                ProfileMenu(icon = ImageVector.vectorResource(R.drawable.facebook), name = "Follow us on facebook") {
+                    openLinkInBrowser(context, "https://www.facebook.com/DynamicDuoHearts")
+                }
+                Spacer(Modifier.height(12.dp))
+                ProfileMenu(icon = ImageVector.vectorResource(R.drawable.tiktok), name = "Follow us on tiktok") {
+                    openLinkInBrowser(context, "https://www.tiktok.com/@dynamicduohearts")
+                }
+                Spacer(Modifier.height(12.dp))
+            }
+
         }
 
-        Spacer(Modifier.height(12.dp))
-        SettingsMenu(context)
     }
 }
 
@@ -141,8 +197,8 @@ private fun Header(navController: NavController) {
     }
 }
 
-@Composable
-private fun SettingsMenu(context: Context) {
+
+private fun settingsItems():List<SettingItem> {
     val settingsItems = listOf(
         SettingItem(
             icon = Icons.Default.PrivacyTip,
@@ -170,18 +226,8 @@ private fun SettingsMenu(context: Context) {
             url = null
         )
     )
+    return  settingsItems
 
-    LazyColumn {
-        items(settingsItems.size) { index ->
-            val item = settingsItems[index]
-            ProfileMenu(icon = item.icon, name = item.title) {
-                item.url?.let {
-                    openLinkInBrowser(context, it)
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-        }
-    }
 }
 
 data class SettingItem(
@@ -216,34 +262,34 @@ fun ProfileMenu(icon: ImageVector, name: String, action: () -> Unit = {}) {
     }
 }
 
-
-fun openLinkInBrowser(context: android.content.Context, url: String) {
-    try {
-        // Check if it's a Play Store URL
-        if (url.contains("play.google.com/store/apps/details")) {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-
-            // Direct to Play Store if available
-            intent.setPackage("com.android.vending") // Play Store package name
-            if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(intent)
-                return
-            }
-        }
-
-        // Fallback to browser if Play Store is not available
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        if (browserIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(browserIntent)
-        } else {
-            Toast.makeText(context, "No application can handle this URL.", Toast.LENGTH_SHORT)
-                .show()
-        }
-    } catch (e: Exception) {
-        DebugMode.e("Error opening URL: ${e.message}")
-        e.printStackTrace()
-    }
-}
+//
+//fun openLinkInBrowser(context: android.content.Context, url: String) {
+//    try {
+//        // Check if it's a Play Store URL
+//        if (url.contains("play.google.com/store/apps/details")) {
+//            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+//
+//            // Direct to Play Store if available
+//            intent.setPackage("com.android.vending") // Play Store package name
+//            if (intent.resolveActivity(context.packageManager) != null) {
+//                context.startActivity(intent)
+//                return
+//            }
+//        }
+//
+//        // Fallback to browser if Play Store is not available
+//        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+//        if (browserIntent.resolveActivity(context.packageManager) != null) {
+//            context.startActivity(browserIntent)
+//        } else {
+//            Toast.makeText(context, "No application can handle this URL.", Toast.LENGTH_SHORT)
+//                .show()
+//        }
+//    } catch (e: Exception) {
+//        DebugMode.e("Error opening URL: ${e.message}")
+//        e.printStackTrace()
+//    }
+//}
 
 
 @Composable

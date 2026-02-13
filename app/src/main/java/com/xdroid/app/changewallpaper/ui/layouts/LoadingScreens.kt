@@ -33,7 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-
+import com.google.protobuf.duration
+import kotlin.time.Duration
 
 
 @Composable
@@ -68,15 +69,16 @@ fun SingleShimmer() {
 @Composable
 fun ShimmerEffect(
     modifier: Modifier = Modifier,
-    shimmerWidth: Float = 200f
+    shimmerWidth: Float = 200f,
+    duration: Int = 5000
 ) {
     // Define animation to shift the gradient position
     val transition = rememberInfiniteTransition(label = "Looping")
     val shimmerTranslate by transition.animateFloat(
         initialValue = -shimmerWidth,
-        targetValue = shimmerWidth * 2,
+        targetValue = shimmerWidth * 20,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = EaseInOut),
+            animation = tween(durationMillis = duration, easing = EaseInOut),
             repeatMode = RepeatMode.Restart
         ), label = ""
     )
@@ -113,8 +115,8 @@ fun ShimmerPlaceholder(
     // Use shimmer effect on placeholder items
     Column(
         modifier = modifier
-            .padding(16.dp)
-            .width(350.dp)
+            .padding(8.dp)
+            .fillMaxWidth()
     ) {
         ShimmerEffect(modifier = Modifier
             .height(220.dp)
@@ -136,7 +138,8 @@ fun FullScreenShimmer(
     ) {
         ShimmerEffect(modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight()
+            .fillMaxHeight(),
+            duration= 10000
         )
 
     }
@@ -155,6 +158,24 @@ fun ShimmerAdPlaceHolder(
     ) {
         ShimmerEffect(modifier = Modifier
             .height(100.dp)
+            .fillMaxWidth()
+        )
+
+    }
+}
+
+@Composable
+fun ShimmerAdPlaceHolder2(
+    modifier: Modifier = Modifier
+) {
+    // Use shimmer effect on placeholder items
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        ShimmerEffect(modifier = Modifier
+            .height(250.dp)
             .fillMaxWidth()
         )
 

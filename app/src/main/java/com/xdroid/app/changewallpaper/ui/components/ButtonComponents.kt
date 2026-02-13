@@ -1,8 +1,10 @@
 package com.xdroid.app.changewallpaper.ui.components
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.widget.Toast
@@ -46,6 +48,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -68,6 +71,7 @@ import com.xdroid.app.changewallpaper.utils.helpers.DebugMode
 import com.xdroid.app.changewallpaper.utils.helpers.isNull
 import kotlinx.coroutines.delay
 import java.util.Random
+import androidx.core.net.toUri
 
 @Composable
 fun ButtonCompo(
@@ -344,7 +348,11 @@ fun AutoAdSliderNetwork(banner: List<AdItem>, modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("AD", style = latoBold8.copy(color = white), modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp))
+                    Text(
+                        "AD",
+                        style = latoBold8.copy(color = white),
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                    )
                 }
 
                 Row(
@@ -355,7 +363,7 @@ fun AutoAdSliderNetwork(banner: List<AdItem>, modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button (
+                    Button(
                         modifier = Modifier
                             .height(30.dp)
                             .padding(horizontal = 8.dp),
@@ -382,7 +390,7 @@ fun AutoAdSliderNetwork(banner: List<AdItem>, modifier: Modifier = Modifier) {
 
 
 fun activeList(banners: List<AdItem>): List<AdItem> {
-    return banners.filter { it.status.isNull() && it.appId != BuildConfig.APP_ID}
+    return banners.filter { it.status.isNull() && it.appId != BuildConfig.APP_ID }
 
 }
 
@@ -408,31 +416,31 @@ fun NetworkImageAds(
     )
 }
 
+fun openLinkInBrowser(context: Context, url: String) {
+    if (url.isBlank()) return
 
-fun openLinkInBrowser(context: android.content.Context, url: String) {
-    try {
-        // Check if it's a Play Store URL
-        if (url.contains("play.google.com/store/apps/details")) {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    val safeUrl = if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        "https://$url"
+    } else url
 
-            // Direct to Play Store if available
-            intent.setPackage("com.android.vending") // Play Store package name
-            if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(intent)
-                return
-            }
-        }
-
-        // Fallback to browser if Play Store is not available
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        if (browserIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(browserIntent)
-        } else {
-            Toast.makeText(context, "No application can handle this URL.", Toast.LENGTH_SHORT)
-                .show()
-        }
+    val uri = try {
+        safeUrl.toUri()
     } catch (e: Exception) {
-        DebugMode.e("Error opening URL: ${e.message}")
+        Toast.makeText(context, "Invalid URL", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        // Only open in browser (ignore specific apps)
+        val chooser = Intent.createChooser(intent, "Open with")
+        context.startActivity(chooser)
+
+    } catch (e: Exception) {
+        Toast.makeText(context, "Cannot open link", Toast.LENGTH_SHORT).show()
         e.printStackTrace()
     }
 }
